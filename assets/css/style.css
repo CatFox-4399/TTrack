@@ -378,8 +378,17 @@ input, select, textarea { font-family: inherit; }
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    position: relative;
+    touch-action: pan-x pan-y;
 }
-table { width: 100%; border-collapse: collapse; }
+table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+}
 thead tr { background: rgba(255,255,255,0.04); }
 thead th {
     padding: 0.85rem 1.25rem;
@@ -403,6 +412,11 @@ tbody td {
     font-size: 0.875rem;
     color: var(--text-primary);
     vertical-align: middle;
+    white-space: nowrap;
+}
+tbody td .empty-state,
+tbody td .empty-state * {
+    white-space: normal;
 }
 .td-muted { color: var(--text-secondary); }
 
