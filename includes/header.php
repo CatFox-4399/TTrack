@@ -62,7 +62,7 @@ $pageTitle = $pageTitle ?? APP_NAME;
                 <?= renderUserAvatar($user) ?>
                 <div class="user-info-mini">
                     <span class="user-name-mini"><?= e($user['full_name']) ?></span>
-                    <span class="user-role-badge <?= $isAdmin ? 'badge-admin' : 'badge-user' ?>"><?= $isAdmin ? 'Admin' : 'User' ?></span>
+                    <span class="user-role-badge <?= $isAdmin ? 'badge-admin' : 'badge-user' ?>"><?= $isAdmin ? 'Admin' : 'Student' ?></span>
                 </div>
                 <div class="user-dropdown">
                     <div class="user-dropdown-inner">

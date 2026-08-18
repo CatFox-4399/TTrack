@@ -141,7 +141,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="page-header">
     <div class="page-header-left">
         <h1><i class="fas fa-users" style="color:var(--primary)"></i> User Management</h1>
-        <p class="page-subtitle">Create and manage student/user accounts and toilet assignments.</p>
+        <p class="page-subtitle">Create and manage student accounts and toilet assignments.</p>
     </div>
     <div class="page-header-actions">
         <a href="<?= BASE_URL ?>/admin/users.php?action=add" class="btn btn-primary">
@@ -192,7 +192,7 @@ require_once __DIR__ . '/../includes/header.php';
                     </td>
                     <td class="td-muted"><code><?= e($u['username']) ?></code></td>
                     <td class="td-muted"><?= $u['email'] ? e($u['email']) : '—' ?></td>
-                    <td><span class="badge badge-<?= $u['role'] === 'admin' ? 'admin' : 'user-role' ?>"><?= ucfirst($u['role']) ?></span></td>
+                    <td><span class="badge badge-<?= $u['role'] === 'admin' ? 'admin' : 'user-role' ?>"><?= $u['role'] === 'admin' ? 'Admin' : 'Student' ?></span></td>
                     <td>
                         <?php if (empty($toiletIds)): ?>
                             <span class="td-muted">None assigned</span>
@@ -261,7 +261,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="form-group">
                     <label class="form-label" for="add_role">Role</label>
                     <select id="add_role" name="role" class="form-control">
-                        <option value="user">User / Student</option>
+                        <option value="user" selected>Student</option>
                         <option value="admin">Admin</option>
                     </select>
                 </div>
@@ -334,7 +334,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="form-group">
                     <label class="form-label" for="edit_role">Role</label>
                     <select id="edit_role" name="role" class="form-control">
-                        <option value="user" <?= $editUser['role'] === 'user' ? 'selected' : '' ?>>User / Student</option>
+                        <option value="user" <?= $editUser['role'] === 'user' ? 'selected' : '' ?>>Student</option>
                         <option value="admin" <?= $editUser['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
                     </select>
                 </div>

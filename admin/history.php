@@ -63,7 +63,7 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endforeach; ?>
     </select>
     <select name="user_id" class="form-control auto-submit-select" style="max-width:200px">
-        <option value="">All Users</option>
+        <option value="">All Students</option>
         <?php foreach ($allUsers as $u): ?>
             <option value="<?= $u['id'] ?>" <?= $filterUser == $u['id'] ? 'selected' : '' ?>><?= e($u['full_name']) ?></option>
         <?php endforeach; ?>

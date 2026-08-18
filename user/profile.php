@@ -7,9 +7,9 @@ require_once __DIR__ . '/../includes/functions.php';
 requireLogin();
 $currentUser = getCurrentUser();
 
-// Only regular users can customize profile picture
+// Only regular users (students) can customize profile picture
 if ($currentUser['role'] !== ROLE_USER) {
-    setFlash('info', 'Profile picture customization is only available for staff/cleaner user accounts.');
+    setFlash('info', 'Profile picture customization is only available for student accounts.');
     header('Location: ' . BASE_URL . '/admin/index.php');
     exit;
 }
@@ -209,7 +209,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="session-info-item">
                     <span class="session-info-label">Role</span>
                     <span class="session-info-value">
-                        <span class="user-role-badge badge-user">Staff / Cleaner</span>
+                        <span class="user-role-badge badge-user">Student</span>
                     </span>
                 </div>
                 <div class="session-info-item">
