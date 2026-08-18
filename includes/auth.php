@@ -50,6 +50,7 @@ function getCurrentUser() {
         'username'            => $_SESSION['username']  ?? '',
         'full_name'           => $_SESSION['full_name'] ?? '',
         'role'                => $_SESSION['user_role'] ?? '',
+        'profile_picture'     => $_SESSION['profile_picture'] ?? null,
         'must_change_password'=> $_SESSION['must_change_password'] ?? 0,
     ];
 }
@@ -63,6 +64,7 @@ function loginUser($user) {
     $_SESSION['username']            = $user['username'];
     $_SESSION['full_name']           = $user['full_name'];
     $_SESSION['user_role']           = $user['role'];
+    $_SESSION['profile_picture']     = $user['profile_picture'] ?? null;
     $_SESSION['must_change_password']= (int)$user['must_change_password'];
 }
 

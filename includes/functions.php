@@ -201,3 +201,119 @@ function renderFlash() {
        . $icon . ' ' . e($flash['message'])
        . '</div>';
 }
+
+/**
+ * Get the full URL to a user's avatar, or null if none is set.
+ */
+function getUserAvatarUrl($user) {
+    if (empty($user)) return null;
+    $filename = is_array($user) ? ($user['profile_picture'] ?? null) : null;
+    if (!$filename && is_numeric($user)) {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT profile_picture FROM users WHERE id = ?");
+        $stmt->execute([(int)$user]);
+        $row = $stmt->fetch();
+        $filename = $row['profile_picture'] ?? null;
+    }
+    if ($filename && file_exists(AVATAR_DIR . $filename)) {
+        return AVATAR_URL . $filename . '?v=' . filemtime(AVATAR_DIR . $filename);
+    }
+    return null;
+}
+
+/**
+ * Render user avatar markup (either image or initial letter).
+ */
+function renderUserAvatar($user, $extraClass = '', $style = '') {
+    $url = getUserAvatarUrl($user);
+    $name = is_array($user) ? ($user['full_name'] ?? $user['username'] ?? 'U') : 'U';
+    $initial = strtoupper(substr(trim($name), 0, 1)) ?: 'U';
+
+    $classAttr = 'user-avatar' . ($extraClass ? ' ' . e($extraClass) : '');
+    $styleAttr = $style ? ' style="' . e($style) . '"' : '';
+
+    if ($url) {
+        return '<img src="' . e($url) . '" class="' . $classAttr . ' user-avatar-img" alt="' . e($name) . '"' . $styleAttr . '>';
+    }
+    return '<span class="' . $classAttr . '"' . $styleAttr . '>' . e($initial) . '</span>';
+}
+
+/**
+ * Upload and set a new profile picture for a user.
+ */
+function uploadUserAvatar($file, $userId) {
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return ['success' => false, 'error' => 'File upload error code: ' . $file['error']];
+    }
+    if ($file['size'] > 5 * 1024 * 1024) {
+        return ['success' => false, 'error' => 'Image size must be 5MB or less.'];
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+
+    $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!in_array($mimeType, $allowed, true)) {
+        return ['success' => false, 'error' => 'Invalid file format. Please upload JPG, PNG, WEBP, or GIF.'];
+    }
+
+    if (!is_dir(AVATAR_DIR)) {
+        mkdir(AVATAR_DIR, 0755, true);
+    }
+
+    $ext = match ($mimeType) {
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        'image/gif'  => 'gif',
+        default      => 'jpg'
+    };
+
+    $db = getDB();
+    // Fetch and remove existing avatar file if any
+    $stmt = $db->prepare("SELECT profile_picture FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $old = $stmt->fetchColumn();
+    if ($old && file_exists(AVATAR_DIR . $old)) {
+        @unlink(AVATAR_DIR . $old);
+    }
+
+    $filename = 'avatar_' . $userId . '_' . time() . '.' . $ext;
+    $destination = AVATAR_DIR . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        return ['success' => false, 'error' => 'Failed to save uploaded image.'];
+    }
+
+    $stmt = $db->prepare("UPDATE users SET profile_picture = ? WHERE id = ?");
+    $stmt->execute([$filename, $userId]);
+
+    if (isset($_SESSION['user_id']) && (int)$_SESSION['user_id'] === (int)$userId) {
+        $_SESSION['profile_picture'] = $filename;
+    }
+
+    return ['success' => true, 'filename' => $filename];
+}
+
+/**
+ * Delete a user's custom profile picture.
+ */
+function deleteUserAvatar($userId) {
+    $db = getDB();
+    $stmt = $db->prepare("SELECT profile_picture FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $old = $stmt->fetchColumn();
+    if ($old && file_exists(AVATAR_DIR . $old)) {
+        @unlink(AVATAR_DIR . $old);
+    }
+
+    $stmt = $db->prepare("UPDATE users SET profile_picture = NULL WHERE id = ?");
+    $stmt->execute([$userId]);
+
+    if (isset($_SESSION['user_id']) && (int)$_SESSION['user_id'] === (int)$userId) {
+        $_SESSION['profile_picture'] = null;
+    }
+
+    return ['success' => true];
+}

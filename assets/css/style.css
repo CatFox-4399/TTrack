@@ -203,6 +203,18 @@ input, select, textarea { font-family: inherit; }
     font-size: 0.85rem;
     color: var(--text-inverse);
     flex-shrink: 0;
+    overflow: hidden;
+}
+.user-avatar-img {
+    width: 34px; height: 34px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    flex-shrink: 0;
+}
+.user-avatar-lg {
+    width: 52px; height: 52px;
+    font-size: 1.3rem;
 }
 .user-info-mini { display: flex; flex-direction: column; }
 .user-name-mini { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
@@ -1513,5 +1525,11 @@ select[multiple].form-control { height: 120px; }
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr !important;
+    }
 }
 

@@ -50,19 +50,25 @@ $pageTitle = $pageTitle ?? APP_NAME;
                 <a href="<?= $baseUrl ?>/user/dashboard.php" class="nav-link <?= strpos($_SERVER['PHP_SELF'],'user/dashboard') !== false ? 'active' : '' ?>">
                     <i class="fas fa-home"></i> My Toilets
                 </a>
+                <a href="<?= $baseUrl ?>/user/profile.php" class="nav-link <?= strpos($_SERVER['PHP_SELF'],'user/profile') !== false ? 'active' : '' ?>">
+                    <i class="fas fa-user-gear"></i> Profile Picture
+                </a>
             <?php endif; ?>
         </div>
 
         <!-- Right side -->
         <div class="nav-right">
             <div class="nav-user-badge">
-                <span class="user-avatar"><?= strtoupper(substr($user['full_name'], 0, 1)) ?></span>
+                <?= renderUserAvatar($user) ?>
                 <div class="user-info-mini">
                     <span class="user-name-mini"><?= e($user['full_name']) ?></span>
                     <span class="user-role-badge <?= $isAdmin ? 'badge-admin' : 'badge-user' ?>"><?= $isAdmin ? 'Admin' : 'User' ?></span>
                 </div>
                 <div class="user-dropdown">
                     <div class="user-dropdown-inner">
+                        <?php if (!$isAdmin): ?>
+                            <a href="<?= $baseUrl ?>/user/profile.php"><i class="fas fa-user-gear"></i> Profile Picture</a>
+                        <?php endif; ?>
                         <a href="<?= $baseUrl ?>/change_password.php"><i class="fas fa-key"></i> Change Password</a>
                         <a href="<?= $baseUrl ?>/logout.php" class="text-danger"><i class="fas fa-right-from-bracket"></i> Logout</a>
                     </div>

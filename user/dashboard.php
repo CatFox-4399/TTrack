@@ -23,9 +23,19 @@ require_once __DIR__ . '/../includes/header.php';
 <?php renderFlash(); ?>
 
 <div class="page-header">
-    <div class="page-header-left">
-        <h1><i class="fas fa-home" style="color:var(--primary)"></i> My Assigned Toilets</h1>
-        <p class="page-subtitle">Welcome, <?= e($currentUser['full_name']) ?>! Select a toilet to check in.</p>
+    <div class="page-header-left" style="display:flex;align-items:center;gap:1.1rem;">
+        <a href="<?= BASE_URL ?>/user/profile.php" title="Customize Profile Picture" style="text-decoration:none;display:inline-block;flex-shrink:0;">
+            <?= renderUserAvatar($currentUser, 'user-avatar-lg', 'width:52px;height:52px;font-size:1.3rem;box-shadow:0 0 12px rgba(0,212,170,0.25);border:2px solid var(--border);') ?>
+        </a>
+        <div>
+            <h1><i class="fas fa-home" style="color:var(--primary)"></i> My Assigned Toilets</h1>
+            <p class="page-subtitle">Welcome back, <?= e($currentUser['full_name']) ?>! Select a toilet to check in.</p>
+        </div>
+    </div>
+    <div class="page-header-actions">
+        <a href="<?= BASE_URL ?>/user/profile.php" class="btn btn-secondary btn-sm">
+            <i class="fas fa-user-gear"></i> Profile Picture
+        </a>
     </div>
 </div>
 

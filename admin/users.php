@@ -186,9 +186,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <td class="td-muted"><?= $i + 1 ?></td>
                     <td>
                         <div style="display:flex;align-items:center;gap:0.65rem">
-                            <div class="user-avatar" style="width:32px;height:32px;font-size:0.75rem;flex-shrink:0">
-                                <?= strtoupper(substr($u['full_name'],0,1)) ?>
-                            </div>
+                            <?= renderUserAvatar($u, '', 'width:32px;height:32px;font-size:0.75rem;flex-shrink:0') ?>
                             <strong><?= e($u['full_name']) ?></strong>
                         </div>
                     </td>
