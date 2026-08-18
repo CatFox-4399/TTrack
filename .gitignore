@@ -1,4 +1,4 @@
-config/database.php
 config/config.php
+config/database.php
 database/schema.sql
 readme

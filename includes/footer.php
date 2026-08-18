@@ -7,6 +7,12 @@
     </div>
 </footer>
 
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightboxOverlay">
+    <button class="lightbox-close" aria-label="Close photo view"><i class="fas fa-times"></i></button>
+    <img id="lightboxImg" class="lightbox-img" src="" alt="Enlarged photo">
+</div>
+
 <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
 </body>
 </html>

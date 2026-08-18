@@ -113,12 +113,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (lightboxImg) lightboxImg.src = '';
     }
 
-    document.querySelectorAll('.photo-gallery a, .lightbox-trigger').forEach(link => {
-        link.addEventListener('click', e => {
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('.photo-gallery a, .lightbox-trigger');
+        if (link) {
             e.preventDefault();
             const src = link.getAttribute('href') || link.getAttribute('data-src');
             if (src) openLightbox(src);
-        });
+        }
     });
 
     if (lightboxOverlay) {
@@ -180,11 +181,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ===========================================================
-       PHOTO CAPTURE SYSTEM
+       PHOTO CAPTURE SYSTEM (LIVE CAMERA ONLY)
        Handles:
-         1. Photo upload area (file picker + drag-and-drop + paste)
-         2. Live camera modal (MediaStream API)
-         3. DataTransfer injection so captured blobs submit with form
+         1. Photo capture trigger (launches live camera modal)
+         2. Live camera viewfinder & photo capture (MediaStream API)
+         3. DataTransfer injection so captured camera blobs submit with form
        =========================================================== */
 
     /**
@@ -195,20 +196,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /**
      * Build (or rebuild) a DataTransfer on the hidden input so the form
-     * submits all files: those from the file picker + camera captures.
+     * submits camera captures.
      */
     function syncFilesToInput(inputEl, gridId) {
-        const extra = capturedFiles[gridId] || [];
-        // Re-attach original selected files + extras via DataTransfer
+        const captures = capturedFiles[gridId] || [];
         const dt = new DataTransfer();
-        // Preserved picker files are stored on the input element itself
-        const pickerFiles = inputEl._pickerFiles || [];
-        pickerFiles.forEach(f => dt.items.add(f));
-        extra.forEach(entry => dt.items.add(new File([entry.blob], entry.filename, { type: entry.blob.type })));
+        captures.forEach(entry => {
+            dt.items.add(new File([entry.blob], entry.filename, { type: entry.blob.type || 'image/jpeg' }));
+        });
         try {
             inputEl.files = dt.files;
         } catch(e) {
-            // Fallback: some browsers block setting files; hidden inputs will carry blobs
+            // Fallback: in case browser restricts setting files programmatically
         }
     }
 
@@ -216,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
      * Render a preview thumbnail in the grid.
      * @param {string}   dataUrl  — image src
      * @param {string}   gridId   — preview grid element ID
-     * @param {string}   label    — optional label (e.g. "Camera")
+     * @param {string}   label    — optional label (e.g. "Camera 1")
      * @param {Function} onRemove — called when ✕ clicked
      */
     function addThumb(dataUrl, gridId, label, onRemove) {
@@ -227,10 +226,11 @@ document.addEventListener('DOMContentLoaded', function () {
         thumb.className = 'photo-thumb';
         thumb.innerHTML = `
             <img src="${dataUrl}" alt="Photo preview">
-            <button type="button" class="remove-photo" title="Remove">✕</button>
+            <button type="button" class="remove-photo" title="Remove Photo">✕</button>
             ${label ? `<div class="photo-thumb-label">${label}</div>` : ''}
         `;
-        thumb.querySelector('.remove-photo').addEventListener('click', () => {
+        thumb.querySelector('.remove-photo').addEventListener('click', (e) => {
+            e.stopPropagation();
             thumb.remove();
             if (onRemove) onRemove();
         });
@@ -238,10 +238,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * Add a Blob as a captured photo (from camera or paste).
+     * Add a Blob as a captured photo from camera.
      */
     function addCapturedBlob(blob, gridId, inputEl, label) {
-        const filename = label.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now() + '.jpg';
+        const filename = 'camera_' + Date.now() + '_' + Math.floor(Math.random() * 1000) + '.jpg';
         if (!capturedFiles[gridId]) capturedFiles[gridId] = [];
 
         const entry = { blob, filename, dataUrl: null };
@@ -261,147 +261,22 @@ document.addEventListener('DOMContentLoaded', function () {
         reader.readAsDataURL(blob);
     }
 
-    // ---- Initialise each upload area ----
+    // ---- Initialise each photo capture area ----
     document.querySelectorAll('.photo-upload-area').forEach(area => {
         const input  = area.querySelector('input[type="file"]');
         const gridId = area.getAttribute('data-preview');
         if (!input || !gridId) return;
 
         capturedFiles[gridId] = [];
-        input._pickerFiles = [];
 
-        // --- Upgrade the area HTML with tabs + paste hint ---
-        // Move the hidden file input out so it doesn't intercept button clicks
-        const uploadBody = area.querySelector('.upload-icon')
-            ? area.querySelector('.upload-icon').parentNode
-            : area;
+        // Ensure file input is hidden and does not open OS file dialog
+        input.style.display = 'none';
 
-        // Insert tab row before the upload icon
-        const tabRow = document.createElement('div');
-        tabRow.className = 'capture-tabs';
-        tabRow.innerHTML = `
-            <button type="button" class="capture-tab-btn active" data-tab="upload">
-                <i class="fas fa-folder-open"></i> Gallery / File
-            </button>
-            <button type="button" class="capture-tab-btn" data-tab="camera">
-                <i class="fas fa-camera"></i> Live Camera
-            </button>
-        `;
-        area.insertBefore(tabRow, area.firstChild);
-
-        // Move input to after the tab row (so clicks on area still trigger it in upload mode)
-        area.appendChild(input);
-
-        // Camera open button (hidden by default until camera tab is active)
-        const camBtn = document.createElement('button');
-        camBtn.type = 'button';
-        camBtn.className = 'open-camera-btn';
-        camBtn.style.display = 'none';
-        camBtn.innerHTML = '<i class="fas fa-camera-retro"></i> Open Camera';
-        area.appendChild(camBtn);
-
-        // Paste hint
-        const pasteHint = document.createElement('div');
-        pasteHint.className = 'paste-hint';
-        pasteHint.innerHTML = `<i class="fas fa-clipboard"></i> Or paste: <kbd>Ctrl</kbd>+<kbd>V</kbd>`;
-        area.appendChild(pasteHint);
-
-        // --- Tab switching ---
-        let activeTab = 'upload';
-        tabRow.querySelectorAll('.capture-tab-btn').forEach(btn => {
-            btn.addEventListener('click', e => {
-                e.stopPropagation();
-                activeTab = btn.getAttribute('data-tab');
-                tabRow.querySelectorAll('.capture-tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                if (activeTab === 'upload') {
-                    input.style.pointerEvents = '';
-                    camBtn.style.display = 'none';
-                } else {
-                    // Camera tab — file input must NOT intercept clicks
-                    input.style.pointerEvents = 'none';
-                    camBtn.style.display = 'inline-flex';
-                }
-            });
-        });
-
-        // --- Drag & Drop ---
-        area.addEventListener('dragover', e => {
+        // Clicking anywhere on the area opens the live camera modal
+        area.addEventListener('click', e => {
             e.preventDefault();
-            area.classList.add('drag-over');
-        });
-        area.addEventListener('dragleave', e => {
-            if (!area.contains(e.relatedTarget)) area.classList.remove('drag-over');
-        });
-        area.addEventListener('drop', e => {
-            e.preventDefault();
-            area.classList.remove('drag-over');
-            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-            if (files.length === 0) return;
-            files.forEach(f => {
-                input._pickerFiles.push(f);
-                const reader = new FileReader();
-                reader.onload = ev => addThumb(ev.target.result, gridId, 'Drop', () => {
-                    const idx = input._pickerFiles.indexOf(f);
-                    if (idx !== -1) input._pickerFiles.splice(idx, 1);
-                    syncFilesToInput(input, gridId);
-                });
-                reader.readAsDataURL(f);
-            });
-            syncFilesToInput(input, gridId);
-        });
-
-        // --- File picker change ---
-        input.addEventListener('change', function () {
-            const files = Array.from(this.files);
-            input._pickerFiles = files; // Replace (not accumulate) picker files
-            const grid = document.getElementById(gridId);
-            // Clear existing picker thumbs (leave camera thumbs)
-            grid.querySelectorAll('.photo-thumb:not([data-source="camera"])').forEach(t => t.remove());
-
-            files.forEach(file => {
-                if (!file.type.startsWith('image/')) return;
-                const reader = new FileReader();
-                reader.onload = ev => {
-                    addThumb(ev.target.result, gridId, '', () => {
-                        const idx = input._pickerFiles.indexOf(file);
-                        if (idx !== -1) input._pickerFiles.splice(idx, 1);
-                        syncFilesToInput(input, gridId);
-                    });
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-
-        // --- Camera modal open ---
-        camBtn.addEventListener('click', e => {
             e.stopPropagation();
             openCameraModal(input, gridId);
-        });
-    });
-
-    // ---- Clipboard Paste (Ctrl+V / Cmd+V) ----
-    document.addEventListener('paste', e => {
-        const items = Array.from(e.clipboardData.items || []);
-        const imageItems = items.filter(i => i.type.startsWith('image/'));
-        if (imageItems.length === 0) return;
-
-        // Find focused / hovered upload area, or fall back to first
-        const areas = document.querySelectorAll('.photo-upload-area');
-        let target = document.querySelector('.photo-upload-area:hover') || areas[0];
-        if (!target) return;
-
-        const input  = target.querySelector('input[type="file"]');
-        const gridId = target.getAttribute('data-preview');
-        if (!input || !gridId) return;
-
-        target.classList.add('paste-highlight');
-        setTimeout(() => target.classList.remove('paste-highlight'), 700);
-
-        imageItems.forEach((item, i) => {
-            const blob = item.getAsFile();
-            if (blob) addCapturedBlob(blob, gridId, input, 'Paste');
         });
     });
 

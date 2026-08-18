@@ -175,7 +175,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="section-label checkin" style="margin-bottom:0.5rem"><i class="fas fa-images"></i> Before Photos</div>
             <div class="photo-gallery">
                 <?php foreach ($activeCheckinPhotos as $p): ?>
-                    <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>">
+                    <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>" title="<?= e($p['original_name'] ?? 'Before Photo') ?>">
                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>" alt="Check-in photo" loading="lazy">
                     </a>
                 <?php endforeach; ?>
@@ -198,11 +198,15 @@ require_once __DIR__ . '/../includes/header.php';
                     <i class="fas fa-camera"></i> After Cleaning Photos
                 </label>
                 <div class="photo-upload-area" data-preview="checkoutPreview">
-                    <input type="file" id="checkout_photos" name="checkout_photos[]"
-                           accept="image/*" multiple>
+                    <input type="file" id="checkout_photos" name="checkout_photos[]" style="display:none;" multiple>
                     <div class="upload-icon"><i class="fas fa-camera"></i></div>
-                    <div class="upload-text">Tap to take / upload photos</div>
-                    <div class="upload-hint">Multiple photos allowed • JPG, PNG, WEBP • Max 10MB each</div>
+                    <div class="upload-text">Take Photo (Live Camera)</div>
+                    <div class="upload-hint">Live camera capture only &bull; Tap anywhere to launch camera</div>
+                    <div style="margin-top:0.75rem;">
+                        <span class="open-camera-btn" style="display:inline-flex;margin-bottom:0;">
+                            <i class="fas fa-camera-retro"></i> Open Live Camera
+                        </span>
+                    </div>
                 </div>
                 <div id="checkoutPreview" class="photo-preview-grid"></div>
             </div>
@@ -248,11 +252,15 @@ require_once __DIR__ . '/../includes/header.php';
                     <i class="fas fa-camera"></i> Before Photos (Current Condition)
                 </label>
                 <div class="photo-upload-area" data-preview="checkinPreview">
-                    <input type="file" id="checkin_photos" name="checkin_photos[]"
-                           accept="image/*" multiple>
+                    <input type="file" id="checkin_photos" name="checkin_photos[]" style="display:none;" multiple>
                     <div class="upload-icon"><i class="fas fa-camera"></i></div>
-                    <div class="upload-text">Tap to take / upload photos</div>
-                    <div class="upload-hint">Multiple photos allowed • JPG, PNG, WEBP • Max 10MB each</div>
+                    <div class="upload-text">Take Photo (Live Camera)</div>
+                    <div class="upload-hint">Live camera capture only &bull; Tap anywhere to launch camera</div>
+                    <div style="margin-top:0.75rem;">
+                        <span class="open-camera-btn" style="display:inline-flex;margin-bottom:0;">
+                            <i class="fas fa-camera-retro"></i> Open Live Camera
+                        </span>
+                    </div>
                 </div>
                 <div id="checkinPreview" class="photo-preview-grid"></div>
             </div>
@@ -332,13 +340,13 @@ require_once __DIR__ . '/../includes/header.php';
                                 <div class="section-comment">
                                     <?= $sess['checkin_comment'] ? '"'.e($sess['checkin_comment']).'"' : '<em style="opacity:0.5">No comment</em>' ?>
                                 </div>
-                                <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.5rem;font-size:0.72rem">
+                                <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.72rem">
                                     BEFORE PHOTOS (<?= count($ciPhotos) ?>)
                                 </div>
                                 <?php if (!empty($ciPhotos)): ?>
                                     <div class="photo-gallery">
                                         <?php foreach ($ciPhotos as $p): ?>
-                                            <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>">
+                                            <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>" title="<?= e($p['original_name'] ?? 'Before Photo') ?>">
                                                 <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>" alt="Before" loading="lazy">
                                             </a>
                                         <?php endforeach; ?>
@@ -360,13 +368,13 @@ require_once __DIR__ . '/../includes/header.php';
                                 <div class="section-comment">
                                     <?= $sess['checkout_comment'] ? '"'.e($sess['checkout_comment']).'"' : '<em style="opacity:0.5">No comment</em>' ?>
                                 </div>
-                                <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.5rem;font-size:0.72rem">
+                                <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.72rem">
                                     AFTER PHOTOS (<?= count($coPhotos) ?>)
                                 </div>
                                 <?php if (!empty($coPhotos)): ?>
                                     <div class="photo-gallery">
                                         <?php foreach ($coPhotos as $p): ?>
-                                            <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>">
+                                            <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>" title="<?= e($p['original_name'] ?? 'After Photo') ?>">
                                                 <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>" alt="After" loading="lazy">
                                             </a>
                                         <?php endforeach; ?>
@@ -381,12 +389,6 @@ require_once __DIR__ . '/../includes/header.php';
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-</div>
-
-<!-- Lightbox -->
-<div class="lightbox-overlay" id="lightboxOverlay">
-    <button class="lightbox-close"><i class="fas fa-times"></i></button>
-    <img id="lightboxImg" class="lightbox-img" src="" alt="Photo">
 </div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

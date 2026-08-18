@@ -162,12 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<!-- Lightbox -->
-<div class="lightbox-overlay" id="lightboxOverlay">
-    <button class="lightbox-close"><i class="fas fa-times"></i></button>
-    <img id="lightboxImg" class="lightbox-img" src="" alt="Photo">
-</div>
-
 <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
 </body>
 </html>

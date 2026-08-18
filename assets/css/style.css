@@ -646,8 +646,7 @@ select[multiple].form-control { height: 120px; }
     background: var(--primary-glow);
 }
 .photo-upload-area input[type="file"] {
-    position: absolute; inset: 0;
-    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    display: none !important;
 }
 .upload-icon { font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem; }
 .upload-text { color: var(--text-secondary); font-size: 0.9rem; }
@@ -684,7 +683,9 @@ select[multiple].form-control { height: 120px; }
 }
 .photo-thumb:hover .remove-photo { opacity: 1; }
 
-/* Photo gallery (history view) */
+/* ============================================================
+   PHOTO GALLERY (history & session view)
+   ============================================================ */
 .photo-gallery {
     display: flex;
     flex-wrap: wrap;
@@ -693,16 +694,27 @@ select[multiple].form-control { height: 120px; }
 }
 .photo-gallery a {
     display: block;
-    width: 80px; height: 80px;
+    width: 76px;
+    height: 76px;
     border-radius: var(--radius-sm);
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     transition: all var(--transition);
+    flex-shrink: 0;
+    position: relative;
+    background: rgba(0, 0, 0, 0.2);
 }
-.photo-gallery a:hover { border-color: var(--primary); transform: scale(1.05); }
-.photo-gallery img { width: 100%; height: 100%; object-fit: cover; }
-
-/* ============================================================
+.photo-gallery a:hover {
+    border-color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+.photo-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
    TOILET CARDS (user dashboard)
    ============================================================ */
 .toilet-grid {
@@ -962,27 +974,53 @@ select[multiple].form-control { height: 120px; }
    LIGHTBOX (pure CSS/JS)
    ============================================================ */
 .lightbox-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.92);
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 9999;
     display: none;
     align-items: center;
     justify-content: center;
     padding: 2rem;
 }
-.lightbox-overlay.open { display: flex; }
-.lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: var(--radius-md); }
+.lightbox-overlay.open {
+    display: flex;
+}
+.lightbox-img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    animation: zoomIn 0.2s ease-out;
+}
 .lightbox-close {
-    position: fixed; top: 1.5rem; right: 1.5rem;
-    background: rgba(255,255,255,0.1); border: none;
-    color: #fff; font-size: 1.5rem;
-    width: 44px; height: 44px;
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1.25rem;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
 }
-.lightbox-close:hover { background: rgba(255,255,255,0.2); }
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+@keyframes zoomIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 
 /* ============================================================
    UTILITY CLASSES
@@ -1029,48 +1067,47 @@ select[multiple].form-control { height: 120px; }
 
 /* ============================================================
    PHOTO UPLOAD AREA (enhanced)
+   PHOTO CAPTURE AREA (Live Camera Only)
    ============================================================ */
 .photo-upload-area {
     position: relative;
     border: 2px dashed var(--border-hover);
     border-radius: var(--radius-md);
-    padding: 2rem 1.25rem;
+    padding: 1.75rem 1.25rem;
     text-align: center;
     cursor: pointer;
     transition: all var(--transition);
     background: var(--bg-glass);
     overflow: hidden;
+    user-select: none;
 }
-.photo-upload-area:hover,
-.photo-upload-area.drag-over {
+.photo-upload-area:hover {
     border-color: var(--primary);
-    background: rgba(0,212,170,0.06);
-    box-shadow: 0 0 0 4px rgba(0,212,170,0.08);
+    background: rgba(0,212,170,0.08);
+    box-shadow: 0 0 0 4px rgba(0,212,170,0.1);
+    transform: translateY(-1px);
 }
-.photo-upload-area.paste-highlight {
-    border-color: var(--accent);
-    background: rgba(124,111,255,0.08);
-    animation: pulse-border 0.6s ease;
-}
-@keyframes pulse-border {
-    0%,100% { box-shadow: 0 0 0 0 rgba(124,111,255,0.3); }
-    50%      { box-shadow: 0 0 0 8px rgba(124,111,255,0); }
+.photo-upload-area:active {
+    transform: translateY(0);
 }
 .photo-upload-area input[type="file"] {
-    position: absolute; inset: 0;
-    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    display: none !important;
 }
 .upload-icon {
     font-size: 2.2rem;
     color: var(--primary);
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
     line-height: 1;
+    transition: transform var(--transition);
+}
+.photo-upload-area:hover .upload-icon {
+    transform: scale(1.08);
 }
 .upload-text {
     font-weight: 600;
     color: var(--text-primary);
     font-size: 0.95rem;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
 }
 .upload-hint {
     font-size: 0.78rem;
@@ -1078,57 +1115,24 @@ select[multiple].form-control { height: 120px; }
     line-height: 1.5;
 }
 
-/* Tab switcher inside the upload area */
-.capture-tabs {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-bottom: 1rem;
-    position: relative;
-    z-index: 2;
-    pointer-events: all;
-}
-.capture-tab-btn {
-    display: flex; align-items: center; gap: 0.4rem;
-    padding: 0.45rem 1rem;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--border-hover);
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition);
-    position: relative;
-    z-index: 3;
-}
-.capture-tab-btn:hover { color: var(--text-primary); border-color: var(--primary); }
-.capture-tab-btn.active {
-    background: rgba(0,212,170,0.15);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-.capture-tab-btn i { font-size: 0.8rem; }
-
 /* Open-camera button (inside the area) */
 .open-camera-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.4rem;
+    padding: 0.55rem 1.25rem;
     border-radius: var(--radius-full);
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: var(--text-inverse);
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     border: none;
     cursor: pointer;
     transition: all var(--transition);
     position: relative;
     z-index: 3;
-    margin-bottom: 0.5rem;
 }
-.open-camera-btn:hover {
+.photo-upload-area:hover .open-camera-btn {
     filter: brightness(1.1);
     box-shadow: var(--shadow-glow);
     transform: translateY(-1px);
@@ -1453,33 +1457,7 @@ select[multiple].form-control { height: 120px; }
 }
 .camera-error.show { display: flex; align-items: center; justify-content: center; }
 
-/* ============================================================
-   PHOTO GALLERY (history)
-   ============================================================ */
-.photo-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.4rem;
-}
-.photo-gallery a {
-    display: block;
-    width: 72px; height: 72px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: 2px solid var(--border);
-    transition: all var(--transition);
-    flex-shrink: 0;
-}
-.photo-gallery a:hover {
-    border-color: var(--primary);
-    transform: scale(1.04);
-}
-.photo-gallery img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-}
+
 
 /* ============================================================
    SESSION PANEL

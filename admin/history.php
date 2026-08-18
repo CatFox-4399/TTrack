@@ -154,22 +154,21 @@ require_once __DIR__ . '/../includes/header.php';
                             <div class="section-comment" style="opacity:0.5">No comment</div>
                         <?php endif; ?>
 
-                        <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.5rem">
-                            <i class="fas fa-images"></i> Before Photos
-                            <span style="font-weight:400;color:var(--text-muted)">(<?= count($ciPhotos) ?>)</span>
+                        <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.75rem">
+                            <i class="fas fa-images"></i> Before Photos (<?= count($ciPhotos) ?>)
                         </div>
                         <?php if (!empty($ciPhotos)): ?>
                             <div class="photo-gallery">
                                 <?php foreach ($ciPhotos as $p): ?>
                                     <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                       title="<?= e($p['original_name'] ?? 'Photo') ?>">
+                                       title="<?= e($p['original_name'] ?? 'Before Photo') ?>">
                                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
                                              alt="Check-in photo" loading="lazy">
                                     </a>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <p style="color:var(--text-muted);font-size:0.82rem">No photos uploaded</p>
+                            <p style="color:var(--text-muted);font-size:0.8rem">No photos uploaded</p>
                         <?php endif; ?>
                     </div>
 
@@ -191,22 +190,21 @@ require_once __DIR__ . '/../includes/header.php';
                             <div class="section-comment" style="opacity:0.5">No comment</div>
                         <?php endif; ?>
 
-                        <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.5rem">
-                            <i class="fas fa-images"></i> After Photos
-                            <span style="font-weight:400;color:var(--text-muted)">(<?= count($coPhotos) ?>)</span>
+                        <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.75rem">
+                            <i class="fas fa-images"></i> After Photos (<?= count($coPhotos) ?>)
                         </div>
                         <?php if (!empty($coPhotos)): ?>
                             <div class="photo-gallery">
                                 <?php foreach ($coPhotos as $p): ?>
                                     <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                       title="<?= e($p['original_name'] ?? 'Photo') ?>">
+                                       title="<?= e($p['original_name'] ?? 'After Photo') ?>">
                                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
                                              alt="Check-out photo" loading="lazy">
                                     </a>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <p style="color:var(--text-muted);font-size:0.82rem">No photos uploaded</p>
+                            <p style="color:var(--text-muted);font-size:0.8rem">No photos uploaded</p>
                         <?php endif; ?>
                     </div>
                     <?php else: ?>
@@ -229,11 +227,5 @@ require_once __DIR__ . '/../includes/header.php';
     <?php endforeach; ?>
 </div>
 <?php endif; ?>
-
-<!-- Lightbox -->
-<div class="lightbox-overlay" id="lightboxOverlay">
-    <button class="lightbox-close"><i class="fas fa-times"></i></button>
-    <img id="lightboxImg" class="lightbox-img" src="" alt="Photo">
-</div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
