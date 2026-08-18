@@ -375,7 +375,9 @@ input, select, textarea { font-family: inherit; }
     background: var(--bg-glass);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
 }
 table { width: 100%; border-collapse: collapse; }
 thead tr { background: rgba(255,255,255,0.04); }
