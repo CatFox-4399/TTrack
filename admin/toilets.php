@@ -24,11 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status   = ($_POST['status'] ?? 'active') === 'active' ? 'active' : 'inactive';
 
         if (empty($name)) {
-            setFlash('error', 'Toilet name is required.');
+            setFlash('error', __('flash_toilet_name_req'));
         } else {
             $stmt = $db->prepare("INSERT INTO toilets (name, location, description, status) VALUES (?, ?, ?, ?)");
             $stmt->execute([$name, $location, $desc, $status]);
-            setFlash('success', "Toilet '{$name}' added successfully.");
+            setFlash('success', __('flash_toilet_added', $name));
         }
         header('Location: ' . BASE_URL . '/admin/toilets.php');
         exit;
@@ -43,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status   = ($_POST['status'] ?? 'active') === 'active' ? 'active' : 'inactive';
 
         if (empty($name)) {
-            setFlash('error', 'Toilet name is required.');
+            setFlash('error', __('flash_toilet_name_req'));
         } else {
             $stmt = $db->prepare("UPDATE toilets SET name=?, location=?, description=?, status=? WHERE id=?");
             $stmt->execute([$name, $location, $desc, $status, $tid]);
-            setFlash('success', "Toilet updated successfully.");
+            setFlash('success', __('flash_toilet_updated'));
         }
         header('Location: ' . BASE_URL . '/admin/toilets.php');
         exit;
@@ -60,10 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $open = $db->prepare("SELECT COUNT(*) FROM toilet_sessions WHERE toilet_id=? AND status='open'");
         $open->execute([$tid]);
         if ($open->fetchColumn() > 0) {
-            setFlash('error', 'Cannot delete: this toilet has active check-in sessions.');
+            setFlash('error', __('flash_toilet_del_err'));
         } else {
             $db->prepare("DELETE FROM toilets WHERE id=?")->execute([$tid]);
-            setFlash('success', 'Toilet deleted successfully.');
+            setFlash('success', __('flash_toilet_deleted'));
         }
         header('Location: ' . BASE_URL . '/admin/toilets.php');
         exit;
@@ -101,7 +101,7 @@ function getToiletUsers(PDO $db, int $toiletId): array {
     return $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
 
-$pageTitle = 'Toilet Management';
+$pageTitle = __('toilets_mgmt_title');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -109,12 +109,12 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-toilet" style="color:var(--primary)"></i> Toilet Management</h1>
-        <p class="page-subtitle">Add, edit and manage all monitored toilets.</p>
+        <h1><i class="fas fa-toilet" style="color:var(--primary)"></i> <?= e(__('toilets_mgmt_title')) ?></h1>
+        <p class="page-subtitle"><?= e(__('toilets_mgmt_subtitle')) ?></p>
     </div>
     <div class="page-header-actions">
         <a href="<?= BASE_URL ?>/admin/toilets.php?action=add" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Toilet
+            <i class="fas fa-plus"></i> <?= e(__('add_new_toilet')) ?>
         </a>
     </div>
 </div>
@@ -123,18 +123,24 @@ require_once __DIR__ . '/../includes/header.php';
 <?php if (empty($toilets)): ?>
     <div class="empty-state" style="margin-top:3rem">
         <div class="empty-state-icon"><i class="fas fa-toilet"></i></div>
-        <h3>No Toilets Yet</h3>
-        <p>Add your first toilet to start monitoring cleanliness.</p>
+        <h3><?= e(__('no_toilets_title')) ?></h3>
+        <p><?= e(__('no_toilets_desc')) ?></p>
         <a href="<?= BASE_URL ?>/admin/toilets.php?action=add" class="btn btn-primary" style="margin-top:1rem">
-            <i class="fas fa-plus"></i> Add Toilet
+            <i class="fas fa-plus"></i> <?= e(__('add_new_toilet')) ?>
         </a>
     </div>
 <?php else: ?>
 <div class="table-wrapper">
     <table>
         <thead><tr>
-            <th>#</th><th>Name</th><th>Location</th><th>Assigned Users</th>
-            <th>Total Sessions</th><th>Active</th><th>Status</th><th>Actions</th>
+            <th>#</th>
+            <th><?= e(__('th_name')) ?></th>
+            <th><?= e(__('th_location')) ?></th>
+            <th><?= e(__('th_assigned_users')) ?></th>
+            <th><?= e(__('th_total_sessions')) ?></th>
+            <th><?= e(__('th_active')) ?></th>
+            <th><?= e(__('th_status')) ?></th>
+            <th><?= e(__('th_actions')) ?></th>
         </tr></thead>
         <tbody>
         <?php foreach ($toilets as $i => $t): ?>
@@ -155,7 +161,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <td class="td-muted"><?= $t['location'] ? e($t['location']) : '—' ?></td>
                 <td>
                     <?php if (empty($assignedNames)): ?>
-                        <span class="td-muted">None</span>
+                        <span class="td-muted"><?= e(__('none')) ?></span>
                     <?php else: ?>
                         <div style="display:flex;flex-direction:column;gap:2px">
                         <?php foreach ($assignedNames as $name): ?>
@@ -167,32 +173,32 @@ require_once __DIR__ . '/../includes/header.php';
                 <td class="td-muted"><?= $t['total_sessions'] ?></td>
                 <td>
                     <?php if ($t['open_sessions'] > 0): ?>
-                        <span class="badge badge-open">● <?= $t['open_sessions'] ?> active</span>
+                        <span class="badge badge-open">● <?= $t['open_sessions'] ?> <?= strtolower(__('status_active')) ?></span>
                     <?php else: ?>
                         <span class="td-muted">—</span>
                     <?php endif; ?>
                 </td>
                 <td>
                     <span class="badge badge-<?= $t['status'] ?>">
-                        <?= ucfirst($t['status']) ?>
+                        <?= $t['status'] === 'active' ? e(__('status_active')) : e(__('status_inactive')) ?>
                     </span>
                 </td>
                 <td>
                     <div class="action-btns">
                         <a href="<?= BASE_URL ?>/admin/history.php?toilet_id=<?= $t['id'] ?>"
-                           class="btn btn-outline btn-sm btn-icon" title="View History">
+                           class="btn btn-outline btn-sm btn-icon" title="<?= e(__('action_view_history')) ?>">
                             <i class="fas fa-clock-rotate-left"></i>
                         </a>
                         <a href="<?= BASE_URL ?>/admin/toilets.php?action=edit&id=<?= $t['id'] ?>"
-                           class="btn btn-outline btn-sm btn-icon" title="Edit">
+                           class="btn btn-outline btn-sm btn-icon" title="<?= e(__('action_edit')) ?>">
                             <i class="fas fa-pen"></i>
                         </a>
                         <form method="POST" style="display:inline">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="toilet_id" value="<?= $t['id'] ?>">
                             <button type="submit" class="btn btn-danger btn-sm btn-icon"
-                                    data-confirm="Delete toilet '<?= e($t['name']) ?>'? All session history will be lost."
-                                    title="Delete">
+                                    data-confirm="<?= e(__('confirm_delete_toilet', $t['name'])) ?>"
+                                    title="<?= e(__('action_delete')) ?>">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
@@ -211,36 +217,36 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="modal-overlay <?= $action === 'add' ? 'open' : '' ?>" id="modalAddToilet">
     <div class="modal-box">
         <div class="modal-header">
-            <div class="modal-title"><i class="fas fa-plus" style="color:var(--primary)"></i> Add New Toilet</div>
-            <a href="<?= BASE_URL ?>/admin/toilets.php" class="modal-close" title="Close">✕</a>
+            <div class="modal-title"><i class="fas fa-plus" style="color:var(--primary)"></i> <?= e(__('modal_add_toilet')) ?></div>
+            <a href="<?= BASE_URL ?>/admin/toilets.php" class="modal-close" title="<?= e(__('action_close')) ?>">✕</a>
         </div>
         <form method="POST">
             <input type="hidden" name="action" value="save_add">
             <div class="form-group">
-                <label class="form-label" for="add_name">Toilet Name / Number *</label>
+                <label class="form-label" for="add_name"><?= e(__('form_toilet_name_req')) ?></label>
                 <input type="text" id="add_name" name="name" class="form-control"
-                       placeholder="e.g. T01, Block A Male, Ground Floor Female" required>
+                       placeholder="<?= e(__('form_toilet_name_ph')) ?>" required>
             </div>
             <div class="form-group">
-                <label class="form-label" for="add_location">Location</label>
+                <label class="form-label" for="add_location"><?= e(__('th_location')) ?></label>
                 <input type="text" id="add_location" name="location" class="form-control"
-                       placeholder="e.g. Block A, Ground Floor">
+                       placeholder="<?= e(__('form_toilet_loc_ph')) ?>">
             </div>
             <div class="form-group">
-                <label class="form-label" for="add_desc">Description</label>
+                <label class="form-label" for="add_desc"><?= e(__('form_toilet_desc_ph')) ?></label>
                 <textarea id="add_desc" name="description" class="form-control" rows="2"
-                          placeholder="Additional notes about this toilet…"></textarea>
+                          placeholder="<?= e(__('form_toilet_desc_ph')) ?>"></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label" for="add_status">Status</label>
+                <label class="form-label" for="add_status"><?= e(__('th_status')) ?></label>
                 <select id="add_status" name="status" class="form-control">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active"><?= e(__('status_active')) ?></option>
+                    <option value="inactive"><?= e(__('status_inactive')) ?></option>
                 </select>
             </div>
             <div class="modal-footer">
-                <a href="<?= BASE_URL ?>/admin/toilets.php" class="btn btn-outline">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Add Toilet</button>
+                <a href="<?= BASE_URL ?>/admin/toilets.php" class="btn btn-outline"><?= e(__('action_cancel')) ?></a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> <?= e(__('action_add')) ?></button>
             </div>
         </form>
     </div>
@@ -253,36 +259,36 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="modal-overlay open" id="modalEditToilet">
     <div class="modal-box">
         <div class="modal-header">
-            <div class="modal-title"><i class="fas fa-pen" style="color:var(--primary)"></i> Edit Toilet</div>
-            <a href="<?= BASE_URL ?>/admin/toilets.php" class="modal-close" title="Close">✕</a>
+            <div class="modal-title"><i class="fas fa-pen" style="color:var(--primary)"></i> <?= e(__('modal_edit_toilet')) ?></div>
+            <a href="<?= BASE_URL ?>/admin/toilets.php" class="modal-close" title="<?= e(__('action_close')) ?>">✕</a>
         </div>
         <form method="POST">
             <input type="hidden" name="action" value="save_edit">
             <input type="hidden" name="toilet_id" value="<?= $editToilet['id'] ?>">
             <div class="form-group">
-                <label class="form-label" for="edit_name">Toilet Name / Number *</label>
+                <label class="form-label" for="edit_name"><?= e(__('form_toilet_name_req')) ?></label>
                 <input type="text" id="edit_name" name="name" class="form-control"
                        value="<?= e($editToilet['name']) ?>" required>
             </div>
             <div class="form-group">
-                <label class="form-label" for="edit_location">Location</label>
+                <label class="form-label" for="edit_location"><?= e(__('th_location')) ?></label>
                 <input type="text" id="edit_location" name="location" class="form-control"
                        value="<?= e($editToilet['location'] ?? '') ?>">
             </div>
             <div class="form-group">
-                <label class="form-label" for="edit_desc">Description</label>
+                <label class="form-label" for="edit_desc"><?= e(__('form_toilet_desc_ph')) ?></label>
                 <textarea id="edit_desc" name="description" class="form-control" rows="2"><?= e($editToilet['description'] ?? '') ?></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label" for="edit_status">Status</label>
+                <label class="form-label" for="edit_status"><?= e(__('th_status')) ?></label>
                 <select id="edit_status" name="status" class="form-control">
-                    <option value="active"   <?= $editToilet['status'] === 'active' ? 'selected' : '' ?>>Active</option>
-                    <option value="inactive" <?= $editToilet['status'] === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                    <option value="active"   <?= $editToilet['status'] === 'active' ? 'selected' : '' ?>><?= e(__('status_active')) ?></option>
+                    <option value="inactive" <?= $editToilet['status'] === 'inactive' ? 'selected' : '' ?>><?= e(__('status_inactive')) ?></option>
                 </select>
             </div>
             <div class="modal-footer">
-                <a href="<?= BASE_URL ?>/admin/toilets.php" class="btn btn-outline">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                <a href="<?= BASE_URL ?>/admin/toilets.php" class="btn btn-outline"><?= e(__('action_cancel')) ?></a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> <?= e(__('action_save_changes')) ?></button>
             </div>
         </form>
     </div>

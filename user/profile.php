@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_FILES['avatar']['name'])) {
             $result = uploadUserAvatar($_FILES['avatar'], $userId);
             if ($result['success']) {
-                setFlash('success', 'Profile picture updated successfully!');
+                setFlash('success', __('profile_update_success'));
             } else {
-                setFlash('error', $result['error'] ?? 'Failed to upload profile picture.');
+                setFlash('error', $result['error'] ?? __('profile_format_error'));
             }
         } elseif (!empty($_POST['camera_avatar_data'])) {
             // Data URL from live camera modal
@@ -70,22 +70,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$filename, $userId]);
                     $_SESSION['profile_picture'] = $filename;
 
-                    setFlash('success', 'Profile picture captured and updated successfully!');
+                    setFlash('success', __('profile_update_success'));
                 } else {
-                    setFlash('error', 'Invalid camera photo data.');
+                    setFlash('error', __('profile_format_error'));
                 }
             } else {
-                setFlash('error', 'Failed to process camera photo.');
+                setFlash('error', __('profile_format_error'));
             }
         } else {
-            setFlash('warning', 'Please select or take a photo first.');
+            setFlash('warning', __('profile_select_photo'));
         }
 
         header('Location: ' . BASE_URL . '/user/profile.php');
         exit;
     } elseif ($action === 'delete_avatar') {
         deleteUserAvatar($userId);
-        setFlash('success', 'Profile picture removed. Reverted to default avatar.');
+        setFlash('success', __('profile_remove_success'));
         header('Location: ' . BASE_URL . '/user/profile.php');
         exit;
     }
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Fetch assigned toilets for overview
 $toilets = getAssignedToilets($userId);
 
-$pageTitle = 'My Profile & Avatar';
+$pageTitle = __('profile_title');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -102,8 +102,8 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-user-circle" style="color:var(--primary)"></i> Profile Picture & Account</h1>
-        <p class="page-subtitle">Customize your personal profile picture and manage your account details.</p>
+        <h1><i class="fas fa-user-circle" style="color:var(--primary)"></i> <?= e(__('profile_title')) ?></h1>
+        <p class="page-subtitle"><?= e(__('profile_subtitle')) ?></p>
     </div>
 </div>
 
@@ -112,10 +112,10 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card">
         <div class="card-header">
             <div class="card-title">
-                <i class="fas fa-image" style="color:var(--primary)"></i> Custom Profile Picture
+                <i class="fas fa-image" style="color:var(--primary)"></i> <?= e(__('profile_custom_pic')) ?>
             </div>
             <span class="badge <?= !empty($userRecord['profile_picture']) ? 'badge-open' : 'badge-closed' ?>">
-                <?= !empty($userRecord['profile_picture']) ? 'Custom Photo' : 'Default Initial' ?>
+                <?= !empty($userRecord['profile_picture']) ? e(__('badge_custom_photo')) : e(__('badge_default_initial')) ?>
             </span>
         </div>
         <div class="card-body" style="text-align:center;padding:2rem 1.5rem;">
@@ -134,13 +134,12 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php endif; ?>
                 </div>
                 <div id="newPhotoBadge" class="badge badge-admin" style="display:none;position:absolute;bottom:0;right:50%;transform:translateX(50%);box-shadow:0 2px 8px rgba(0,0,0,0.5);">
-                    New Preview
+                    <?= e(__('badge_new_preview')) ?>
                 </div>
             </div>
 
             <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1.25rem;">
-                Upload a clear photo or take a selfie using your camera.<br>
-                <small style="color:var(--text-muted)">Supported formats: JPG, PNG, WEBP, GIF (Max 5MB)</small>
+                <?= __('profile_pic_desc') ?>
             </p>
 
             <form method="POST" enctype="multipart/form-data" id="avatarForm">
@@ -151,31 +150,31 @@ require_once __DIR__ . '/../includes/header.php';
                 <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem;">
                     <!-- File Upload Button -->
                     <button type="button" class="btn btn-secondary" id="chooseFileBtn">
-                        <i class="fas fa-folder-open"></i> Choose Image
+                        <i class="fas fa-folder-open"></i> <?= e(__('profile_choose_img')) ?>
                     </button>
 
                     <!-- Live Camera Button -->
                     <button type="button" class="btn btn-primary" id="openAvatarCamBtn">
-                        <i class="fas fa-camera"></i> Take Photo
+                        <i class="fas fa-camera"></i> <?= e(__('profile_take_photo')) ?>
                     </button>
                 </div>
 
                 <!-- Submit Button (Enabled when new photo selected) -->
                 <div id="saveAvatarArea" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
                     <button type="submit" class="btn btn-success btn-lg" style="width:100%;">
-                        <i class="fas fa-check"></i> Save Profile Picture
+                        <i class="fas fa-check"></i> <?= e(__('profile_save_btn')) ?>
                     </button>
                     <button type="button" class="btn btn-secondary" id="cancelAvatarBtn" style="width:100%;margin-top:0.5rem;">
-                        Cancel
+                        <?= e(__('action_cancel')) ?>
                     </button>
                 </div>
             </form>
 
             <?php if (!empty($userRecord['profile_picture'])): ?>
-                <form method="POST" onsubmit="return confirm('Remove custom profile picture and revert to initial avatar?');" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+                <form method="POST" onsubmit="return confirm('<?= e(addslashes(__('profile_remove_confirm'))) ?>');" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
                     <input type="hidden" name="action" value="delete_avatar">
                     <button type="submit" class="btn btn-danger btn-sm" style="opacity:0.85;">
-                        <i class="fas fa-trash-can"></i> Remove Profile Picture
+                        <i class="fas fa-trash-can"></i> <?= e(__('profile_remove_btn')) ?>
                     </button>
                 </form>
             <?php endif; ?>
@@ -186,34 +185,34 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card">
         <div class="card-header">
             <div class="card-title">
-                <i class="fas fa-id-card" style="color:var(--accent)"></i> Account Details
+                <i class="fas fa-id-card" style="color:var(--accent)"></i> <?= e(__('profile_acc_details')) ?>
             </div>
             <a href="<?= BASE_URL ?>/change_password.php" class="btn btn-secondary btn-sm">
-                <i class="fas fa-key"></i> Change Password
+                <i class="fas fa-key"></i> <?= e(__('nav_change_password')) ?>
             </a>
         </div>
         <div class="card-body">
             <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;">
                 <div class="session-info-item">
-                    <span class="session-info-label">Full Name</span>
+                    <span class="session-info-label"><?= e(__('profile_fullname')) ?></span>
                     <span class="session-info-value" style="font-weight:600;"><?= e($userRecord['full_name']) ?></span>
                 </div>
                 <div class="session-info-item">
-                    <span class="session-info-label">Username</span>
+                    <span class="session-info-label"><?= e(__('profile_username')) ?></span>
                     <span class="session-info-value"><code><?= e($userRecord['username']) ?></code></span>
                 </div>
                 <div class="session-info-item">
-                    <span class="session-info-label">Email Address</span>
-                    <span class="session-info-value"><?= e($userRecord['email'] ?: 'Not specified') ?></span>
+                    <span class="session-info-label"><?= e(__('profile_email')) ?></span>
+                    <span class="session-info-value"><?= e($userRecord['email'] ?: '—') ?></span>
                 </div>
                 <div class="session-info-item">
-                    <span class="session-info-label">Role</span>
+                    <span class="session-info-label"><?= e(__('profile_role')) ?></span>
                     <span class="session-info-value">
-                        <span class="user-role-badge badge-user">Student</span>
+                        <span class="user-role-badge badge-user"><?= e(__('role_student')) ?></span>
                     </span>
                 </div>
                 <div class="session-info-item">
-                    <span class="session-info-label">Member Since</span>
+                    <span class="session-info-label"><?= e(__('profile_member_since')) ?></span>
                     <span class="session-info-value"><?= fdt($userRecord['created_at'], 'd M Y') ?></span>
                 </div>
             </div>
@@ -221,10 +220,10 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="divider"></div>
 
             <div class="section-label" style="margin-bottom:0.75rem;">
-                <i class="fas fa-toilet"></i> Assigned Toilets (<?= count($toilets) ?>)
+                <i class="fas fa-toilet"></i> <?= __('profile_assigned_toilets', count($toilets)) ?>
             </div>
             <?php if (empty($toilets)): ?>
-                <p style="font-size:0.85rem;color:var(--text-muted);">No toilets currently assigned.</p>
+                <p style="font-size:0.85rem;color:var(--text-muted);"><?= e(__('profile_no_toilets')) ?></p>
             <?php else: ?>
                 <div style="display:flex;flex-direction:column;gap:0.5rem;">
                     <?php foreach ($toilets as $t): ?>
@@ -236,7 +235,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 🚽 <?= e($t['name']) ?>
                             </span>
                             <span style="font-size:0.78rem;color:var(--text-secondary);">
-                                <?= e($t['location'] ?: 'View Toilet') ?> &rarr;
+                                <?= e($t['location'] ?: __('action_view_toilet')) ?> &rarr;
                             </span>
                         </a>
                     <?php endforeach; ?>
@@ -251,7 +250,7 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="camera-modal-box">
         <div class="camera-modal-header">
             <div class="camera-modal-title">
-                <i class="fas fa-camera"></i> Profile Photo Camera
+                <i class="fas fa-camera"></i> <?= e(__('profile_camera_title')) ?>
             </div>
             <button class="camera-modal-close" id="closeAvatarCamBtn" type="button">
                 <i class="fas fa-times"></i>
@@ -266,18 +265,19 @@ require_once __DIR__ . '/../includes/header.php';
 
         <div class="camera-error" id="avatarCamError">
             <i class="fas fa-circle-exclamation"></i>
-            <span id="avatarCamErrorText">Camera access denied. Please allow camera permission in your browser.</span>
+            <span id="avatarCamErrorText"><?= e(__('profile_camera_denied')) ?></span>
         </div>
 
         <div class="camera-controls">
-            <button class="flip-camera-btn" id="flipAvatarCamBtn" type="button" title="Flip Camera">
+            <button class="flip-camera-btn" id="flipAvatarCamBtn" type="button" title="<?= e(__('flip_camera')) ?>">
                 <i class="fas fa-camera-rotate"></i>
             </button>
-            <button class="shutter-btn" id="snapAvatarBtn" type="button" title="Capture Profile Picture"></button>
+            <button class="shutter-btn" id="snapAvatarBtn" type="button" title="<?= e(__('take_photo_shutter')) ?>"></button>
             <div style="width:44px"></div>
         </div>
     </div>
 </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

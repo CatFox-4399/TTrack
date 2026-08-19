@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/auth.php';
 
 // If session claims to be logged in, verify the user actually exists in DB
@@ -33,12 +34,12 @@ if (isLoggedIn()) {
 $error = '';
 
 $dbReady = true;
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
-        $error = 'Please enter your username and password.';
+        $error = __('login_error_empty');
     } else {
         try {
             $db   = getDB();
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             } else {
                 sleep(1); // brute-force delay
-                $error = 'Invalid username or password. Please try again.';
+                $error = __('login_error_invalid');
             }
         } catch (Exception $e) {
             $dbReady = false;
@@ -70,20 +71,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check DB availability silently on GET
     try { getDB(); } catch (Exception $e) { $dbReady = false; }
 }
+
+$currentLang = getCurrentLang();
+$languages = getAvailableLanguages();
+$activeLangMeta = $languages[$currentLang] ?? $languages['en'];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $currentLang ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — <?= APP_NAME ?></title>
-    <meta name="description" content="Login to <?= APP_NAME ?> — College Toilet Cleanliness Monitoring">
+    <title><?= e(__('login_title')) ?> — <?= APP_NAME ?></title>
+    <meta name="description" content="<?= e(__('login_title')) ?> — <?= e(__('app_subtitle')) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css?v=<?= filemtime(__DIR__ . '/assets/css/style.css') ?>">
     <style>
+        .login-lang-bar { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
         .login-features { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem; }
         .login-feature { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; color: #94a3b8; }
         .login-feature i { color: #00d4aa; width: 16px; }
@@ -95,31 +101,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-page">
     <div class="login-box">
 
+        <!-- Top Language Selector -->
+        <div class="login-lang-bar">
+            <div class="nav-lang-badge" tabindex="0" aria-label="Change Language">
+                <span class="lang-flag"><?= $activeLangMeta['flag'] ?></span>
+                <span class="lang-text"><?= $activeLangMeta['native'] ?></span>
+                <i class="fas fa-chevron-down lang-chevron"></i>
+                <div class="lang-dropdown">
+                    <div class="lang-dropdown-inner">
+                        <?php foreach ($languages as $code => $langInfo): ?>
+                            <a href="<?= BASE_URL ?>/set_lang.php?lang=<?= $code ?>&return=<?= urlencode(BASE_URL . '/login.php') ?>"
+                               class="lang-dropdown-item <?= $code === $currentLang ? 'active' : '' ?>">
+                                <span class="lang-flag"><?= $langInfo['flag'] ?></span>
+                                <span class="lang-item-name"><?= $langInfo['native'] ?></span>
+                                <?php if ($code === $currentLang): ?>
+                                    <i class="fas fa-check lang-item-check"></i>
+                                <?php endif; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Brand -->
         <div class="login-brand">
             <div class="login-brand-icon"><i class="fas fa-toilet"></i></div>
             <h1><?= APP_NAME ?></h1>
-            <p><?= APP_SUBTITLE ?></p>
+            <p><?= e(__('app_subtitle')) ?></p>
         </div>
 
         <!-- Features -->
         <div class="login-features">
-            <div class="login-feature"><i class="fas fa-camera"></i> Photo Evidence Check-In / Check-Out</div>
-            <div class="login-feature"><i class="fas fa-clock-rotate-left"></i> Complete Cleanliness History</div>
-            <div class="login-feature"><i class="fas fa-shield-halved"></i> Role-Based Access Control</div>
+            <div class="login-feature"><i class="fas fa-camera"></i> <?= e(__('login_feature_camera')) ?></div>
+            <div class="login-feature"><i class="fas fa-clock-rotate-left"></i> <?= e(__('login_feature_history')) ?></div>
+            <div class="login-feature"><i class="fas fa-shield-halved"></i> <?= e(__('login_feature_rbac')) ?></div>
         </div>
 
         <!-- DB not ready warning -->
         <?php if (!$dbReady): ?>
         <div class="alert alert-warning" style="flex-direction:column;align-items:flex-start;gap:0.5rem">
-            <strong>⚠️ Database not set up yet!</strong>
-            <span style="font-size:0.82rem">Please run the setup first before logging in.</span>
+            <strong>⚠️ <?= e(__('db_not_setup_title')) ?></strong>
+            <span style="font-size:0.82rem"><?= e(__('db_not_setup_desc')) ?></span>
             <a href="<?= BASE_URL ?>/setup.php" class="btn btn-warning btn-sm" style="margin-top:0.25rem">
-                <i class="fas fa-database"></i> Run Setup Now
+                <i class="fas fa-database"></i> <?= e(__('db_run_setup_now')) ?>
             </a>
         </div>
         <?php endif; ?>
-
 
         <!-- Error -->
         <?php if ($error): ?>
@@ -130,21 +158,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" id="loginForm" novalidate>
             <div class="form-group">
                 <label class="form-label" for="username">
-                    <i class="fas fa-user" style="margin-right:0.3rem"></i> Username
+                    <i class="fas fa-user" style="margin-right:0.3rem"></i> <?= e(__('login_username_label')) ?>
                 </label>
                 <input type="text" id="username" name="username" class="form-control"
-                       placeholder="Enter your username"
+                       placeholder="<?= e(__('login_username_placeholder')) ?>"
                        value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
                        autocomplete="username" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="password">
-                    <i class="fas fa-lock" style="margin-right:0.3rem"></i> Password
+                    <i class="fas fa-lock" style="margin-right:0.3rem"></i> <?= e(__('login_password_label')) ?>
                 </label>
                 <div class="password-wrap">
                     <input type="password" id="password" name="password" class="form-control"
-                           placeholder="Enter your password"
+                           placeholder="<?= e(__('login_password_placeholder')) ?>"
                            autocomplete="current-password" required>
                     <button type="button" class="password-toggle" aria-label="Toggle password visibility">
                         <i class="fas fa-eye"></i>
@@ -153,15 +181,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:0.5rem">
-                <i class="fas fa-right-to-bracket"></i> Sign In
+                <i class="fas fa-right-to-bracket"></i> <?= e(__('action_sign_in')) ?>
             </button>
         </form>
 
         <div class="login-divider"></div>
-        <p class="college-name"><i class="fas fa-building-columns" style="margin-right:0.4rem"></i><?= COLLEGE_NAME ?></p>
+        <p class="college-name"><i class="fas fa-building-columns" style="margin-right:0.4rem"></i><?= e(__('college_name')) ?></p>
     </div>
 </div>
 
 <script src="<?= BASE_URL ?>/assets/js/app.js?v=<?= filemtime(__DIR__ . '/assets/js/app.js') ?>"></script>
 </body>
 </html>
+

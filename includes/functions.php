@@ -9,8 +9,10 @@ require_once __DIR__ . '/../config/database.php';
 /**
  * Sanitize a string for output.
  */
-function e($str) {
-    return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+if (!function_exists('e')) {
+    function e($str) {
+        return htmlspecialchars((string)($str ?? ''), ENT_QUOTES, 'UTF-8');
+    }
 }
 
 /**

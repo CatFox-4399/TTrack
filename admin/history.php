@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         // Delete associated photos from DB (files left on disk — admin can clean manually)
         $db->prepare('DELETE FROM session_photos WHERE session_id = ?')->execute([$sid]);
         $db->prepare('DELETE FROM toilet_sessions WHERE id = ?')->execute([$sid]);
-        setFlash('success', 'Session record deleted.');
+        setFlash('success', __('flash_history_deleted'));
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $db->prepare("DELETE FROM session_photos WHERE session_id IN ($placeholders)")->execute($ids);
             $db->prepare("DELETE FROM toilet_sessions WHERE id IN ($placeholders)")->execute($ids);
-            setFlash('success', count($ids) . ' session record(s) deleted.');
+            setFlash('success', __('flash_all_history_deleted', count($ids)));
         }
         // Redirect back without session_id focus filter
         $qs = http_build_query(array_filter([
@@ -76,7 +76,7 @@ $sessions = $sessions->fetchAll();
 $allToilets = getAllToilets();
 $allUsers   = getAllUsers('user');
 
-$pageTitle = 'Session History';
+$pageTitle = __('history_title');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -84,40 +84,40 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-clock-rotate-left" style="color:var(--primary)"></i> Session History</h1>
-        <p class="page-subtitle">Complete check-in / check-out records with photo evidence.</p>
+        <h1><i class="fas fa-clock-rotate-left" style="color:var(--primary)"></i> <?= e(__('history_title')) ?></h1>
+        <p class="page-subtitle"><?= e(__('history_subtitle')) ?></p>
     </div>
 </div>
 
 <!-- Filters -->
 <form method="GET" action="" class="filter-bar" style="margin-bottom:1.5rem">
     <select name="toilet_id" class="form-control auto-submit-select" style="max-width:200px">
-        <option value="">All Toilets</option>
+        <option value=""><?= e(__('filter_all_toilets')) ?></option>
         <?php foreach ($allToilets as $t): ?>
             <option value="<?= $t['id'] ?>" <?= $filterToilet == $t['id'] ? 'selected' : '' ?>><?= e($t['name']) ?></option>
         <?php endforeach; ?>
     </select>
     <select name="user_id" class="form-control auto-submit-select" style="max-width:200px">
-        <option value="">All Students</option>
+        <option value=""><?= e(__('filter_all_students')) ?></option>
         <?php foreach ($allUsers as $u): ?>
             <option value="<?= $u['id'] ?>" <?= $filterUser == $u['id'] ? 'selected' : '' ?>><?= e($u['full_name']) ?></option>
         <?php endforeach; ?>
     </select>
     <select name="status" class="form-control auto-submit-select" style="max-width:150px">
-        <option value="">All Status</option>
-        <option value="open"   <?= $filterStatus === 'open'   ? 'selected' : '' ?>>Open</option>
-        <option value="closed" <?= $filterStatus === 'closed' ? 'selected' : '' ?>>Closed</option>
+        <option value=""><?= e(__('filter_all_status')) ?></option>
+        <option value="open"   <?= $filterStatus === 'open'   ? 'selected' : '' ?>><?= e(__('status_open')) ?></option>
+        <option value="closed" <?= $filterStatus === 'closed' ? 'selected' : '' ?>><?= e(__('status_closed')) ?></option>
     </select>
     <input type="date" name="date" class="form-control" style="max-width:180px"
-           value="<?= e($filterDate) ?>" title="Filter by check-in date">
-    <button type="submit" class="btn btn-outline"><i class="fas fa-filter"></i> Filter</button>
+           value="<?= e($filterDate) ?>" title="<?= e(__('filter_by_date')) ?>">
+    <button type="submit" class="btn btn-outline"><i class="fas fa-filter"></i> <?= e(__('action_filter')) ?></button>
     <?php if ($filterToilet || $filterUser || $filterStatus || $filterDate || $sessionFocus): ?>
         <a href="<?= BASE_URL ?>/admin/history.php" class="btn btn-outline">
-            <i class="fas fa-times"></i> Clear
+            <i class="fas fa-times"></i> <?= e(__('action_clear')) ?>
         </a>
     <?php endif; ?>
     <span class="td-muted" style="font-size:0.82rem;margin-left:auto">
-        <?= count($sessions) ?> record<?= count($sessions) != 1 ? 's' : '' ?> found
+        <?= __('records_found', count($sessions)) ?>
     </span>
 </form>
 
@@ -128,8 +128,8 @@ require_once __DIR__ . '/../includes/header.php';
         <input type="hidden" name="action" value="delete_all_filtered">
         <input type="hidden" name="session_ids" value="<?= e($allSessionIds) ?>">
         <button type="submit" class="btn btn-danger btn-sm"
-            data-confirm="Delete ALL <?= count($sessions) ?> visible record(s)? This cannot be undone.">
-            <i class="fas fa-trash-can"></i> Delete All Visible (<?= count($sessions) ?>)
+            data-confirm="<?= e(__('confirm_delete_all_filtered', count($sessions))) ?>">
+            <i class="fas fa-trash-can"></i> <?= e(__('delete_all_visible')) ?> (<?= count($sessions) ?>)
         </button>
     </form>
 </div>
@@ -139,8 +139,8 @@ require_once __DIR__ . '/../includes/header.php';
 <?php if (empty($sessions)): ?>
     <div class="empty-state">
         <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
-        <h3>No Records Found</h3>
-        <p>No session records match the selected filters.</p>
+        <h3><?= e(__('no_history_found')) ?></h3>
+        <p><?= e(__('no_history_desc')) ?></p>
     </div>
 <?php else: ?>
 <div class="history-timeline">
@@ -168,13 +168,13 @@ require_once __DIR__ . '/../includes/header.php';
                             <span style="color:var(--border)">|</span>
                             <i class="fas fa-calendar"></i> <?= fdt($sess['checkin_at'], 'd M Y') ?>
                             <span style="color:var(--border)">|</span>
-                            <i class="fas fa-camera"></i> <?= count($ciPhotos) + count($coPhotos) ?> photo<?= (count($ciPhotos)+count($coPhotos))!=1?'s':'' ?>
+                            <i class="fas fa-camera"></i> <?= count($ciPhotos) + count($coPhotos) ?> <?= e(strtolower(__('photos_count', ''))) ?>
                         </div>
                     </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:0.75rem">
                     <span class="badge badge-<?= $sess['status'] ?>">
-                        <?= $isOpen ? '● Open' : '✓ Closed' ?>
+                        <?= $isOpen ? '● ' . e(__('status_open')) : '✓ ' . e(__('status_closed')) ?>
                     </span>
                     <?php if (!$isOpen): ?>
                         <span class="td-muted" style="font-size:0.8rem">
@@ -187,8 +187,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <input type="hidden" name="action" value="delete_session">
                         <input type="hidden" name="session_id" value="<?= $sess['id'] ?>">
                         <button type="submit" class="btn btn-danger btn-sm btn-icon"
-                            title="Delete this record"
-                            data-confirm="Delete this session record for <?= e($sess['full_name']) ?>? This cannot be undone.">
+                            title="<?= e(__('action_delete')) ?>"
+                            data-confirm="<?= e(__('confirm_delete_session', $sess['full_name'])) ?>">
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>
@@ -202,7 +202,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <!-- Check-In -->
                     <div class="checkin-section">
                         <div class="section-label checkin">
-                            <i class="fas fa-right-to-bracket"></i> Check In
+                            <i class="fas fa-right-to-bracket"></i> <?= e(__('check_in_title')) ?>
                         </div>
                         <div class="section-time">
                             <i class="fas fa-clock"></i> <?= fdt($sess['checkin_at'], 'd M Y, h:i:s A') ?>
@@ -210,24 +210,24 @@ require_once __DIR__ . '/../includes/header.php';
                         <?php if ($sess['checkin_comment']): ?>
                             <div class="section-comment">"<?= e($sess['checkin_comment']) ?>"</div>
                         <?php else: ?>
-                            <div class="section-comment" style="opacity:0.5">No comment</div>
+                            <div class="section-comment" style="opacity:0.5"><?= e(__('no_comment')) ?></div>
                         <?php endif; ?>
 
                         <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.75rem">
-                            <i class="fas fa-images"></i> Before Photos (<?= count($ciPhotos) ?>)
+                            <i class="fas fa-images"></i> <?= __('before_photos_count', count($ciPhotos)) ?>
                         </div>
                         <?php if (!empty($ciPhotos)): ?>
                             <div class="photo-gallery">
                                 <?php foreach ($ciPhotos as $p): ?>
                                     <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                       title="<?= e($p['original_name'] ?? 'Before Photo') ?>">
+                                       title="<?= e($p['original_name'] ?? __('before_photos_count', '')) ?>">
                                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                             alt="Check-in photo" loading="lazy">
+                                             alt="<?= e(__('before_photos_count', '')) ?>" loading="lazy">
                                     </a>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <p style="color:var(--text-muted);font-size:0.8rem">No photos uploaded</p>
+                            <p style="color:var(--text-muted);font-size:0.8rem"><?= e(__('no_photos_uploaded')) ?></p>
                         <?php endif; ?>
                     </div>
 
@@ -238,7 +238,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <!-- Check-Out -->
                     <div class="checkout-section">
                         <div class="section-label checkout">
-                            <i class="fas fa-right-from-bracket"></i> Check Out
+                            <i class="fas fa-right-from-bracket"></i> <?= e(__('check_out_title')) ?>
                         </div>
                         <div class="section-time">
                             <i class="fas fa-clock"></i> <?= fdt($sess['checkout_at'], 'd M Y, h:i:s A') ?>
@@ -246,24 +246,24 @@ require_once __DIR__ . '/../includes/header.php';
                         <?php if ($sess['checkout_comment']): ?>
                             <div class="section-comment">"<?= e($sess['checkout_comment']) ?>"</div>
                         <?php else: ?>
-                            <div class="section-comment" style="opacity:0.5">No comment</div>
+                            <div class="section-comment" style="opacity:0.5"><?= e(__('no_comment')) ?></div>
                         <?php endif; ?>
 
                         <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.75rem">
-                            <i class="fas fa-images"></i> After Photos (<?= count($coPhotos) ?>)
+                            <i class="fas fa-images"></i> <?= __('after_photos_count', count($coPhotos)) ?>
                         </div>
                         <?php if (!empty($coPhotos)): ?>
                             <div class="photo-gallery">
                                 <?php foreach ($coPhotos as $p): ?>
                                     <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                       title="<?= e($p['original_name'] ?? 'After Photo') ?>">
+                                       title="<?= e($p['original_name'] ?? __('after_photos_count', '')) ?>">
                                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                             alt="Check-out photo" loading="lazy">
+                                             alt="<?= e(__('after_photos_count', '')) ?>" loading="lazy">
                                     </a>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <p style="color:var(--text-muted);font-size:0.8rem">No photos uploaded</p>
+                            <p style="color:var(--text-muted);font-size:0.8rem"><?= e(__('no_photos_uploaded')) ?></p>
                         <?php endif; ?>
                     </div>
                     <?php else: ?>
@@ -271,11 +271,11 @@ require_once __DIR__ . '/../includes/header.php';
                         <div style="grid-column:span 1;display:flex;align-items:center;padding:1rem;background:var(--warning-bg);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-md)">
                             <div>
                                 <div style="color:var(--warning);font-weight:700;margin-bottom:0.25rem">
-                                    <i class="fas fa-hourglass-half"></i> Session In Progress
+                                    <i class="fas fa-hourglass-half"></i> <?= e(__('session_in_progress')) ?>
                                 </div>
                                 <div style="color:var(--text-secondary);font-size:0.82rem">
-                                    User has checked in but not yet checked out.<br>
-                                    Duration: <span data-checkin-time="<?= e($sess['checkin_at']) ?>">calculating…</span>
+                                    <?= e(__('session_in_progress_hint')) ?><br>
+                                    <?= e(__('th_duration')) ?>: <span data-checkin-time="<?= e($sess['checkin_at']) ?>">calculating…</span>
                                 </div>
                             </div>
                         </div>
@@ -288,3 +288,4 @@ require_once __DIR__ . '/../includes/header.php';
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+

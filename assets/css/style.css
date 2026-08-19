@@ -260,6 +260,81 @@ input, select, textarea { font-family: inherit; }
 .user-dropdown a:hover { background: var(--bg-glass-hover); color: var(--text-primary) !important; }
 .user-dropdown a.text-danger { color: var(--danger) !important; }
 
+/* Language Switcher Badge & Dropdown */
+.nav-lang-badge {
+    position: relative;
+    cursor: pointer;
+}
+.lang-btn-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    transition: all var(--transition);
+}
+.nav-lang-badge:hover .lang-btn-current {
+    border-color: var(--primary);
+    background: var(--bg-glass-hover);
+}
+.lang-caret {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    transition: transform var(--transition);
+}
+.nav-lang-badge:hover .lang-caret {
+    transform: rotate(180deg);
+}
+.lang-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    padding-top: 6px;
+    background: transparent;
+    z-index: 210;
+}
+.lang-dropdown-inner {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 170px;
+    overflow: hidden;
+    padding: 0.25rem 0;
+}
+.nav-lang-badge:hover .lang-dropdown {
+    display: block;
+}
+.lang-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.825rem;
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    transition: all var(--transition);
+}
+.lang-dropdown-item:hover {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary) !important;
+}
+.lang-dropdown-item.active {
+    color: var(--primary) !important;
+    font-weight: 600;
+    background: rgba(0, 212, 170, 0.08);
+}
+.lang-item-check {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--primary);
+}
+
 .nav-hamburger {
     display: none;
     background: none;

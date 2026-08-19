@@ -8,12 +8,12 @@ $baseUrl = BASE_URL;
 $pageTitle = $pageTitle ?? APP_NAME;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= getCurrentLang() ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?> — <?= APP_NAME ?></title>
-    <meta name="description" content="College Toilet Cleanliness Check-In/Check-Out Monitoring System">
+    <meta name="description" content="<?= e(__('app_subtitle')) ?> — <?= APP_NAME ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -35,42 +35,70 @@ $pageTitle = $pageTitle ?? APP_NAME;
         <div class="nav-links" id="navLinks">
             <?php if ($isAdmin): ?>
                 <a href="<?= $baseUrl ?>/admin/index.php"    class="nav-link <?= strpos($_SERVER['PHP_SELF'],'admin/index') !== false ? 'active' : '' ?>">
-                    <i class="fas fa-gauge-high"></i> Dashboard
+                    <i class="fas fa-gauge-high"></i> <?= __('nav_dashboard') ?>
                 </a>
                 <a href="<?= $baseUrl ?>/admin/users.php"    class="nav-link <?= strpos($_SERVER['PHP_SELF'],'admin/users') !== false ? 'active' : '' ?>">
-                    <i class="fas fa-users"></i> Users
+                    <i class="fas fa-users"></i> <?= __('nav_users') ?>
                 </a>
                 <a href="<?= $baseUrl ?>/admin/toilets.php"  class="nav-link <?= strpos($_SERVER['PHP_SELF'],'admin/toilets') !== false ? 'active' : '' ?>">
-                    <i class="fas fa-toilet"></i> Toilets
+                    <i class="fas fa-toilet"></i> <?= __('nav_toilets') ?>
                 </a>
                 <a href="<?= $baseUrl ?>/admin/history.php"  class="nav-link <?= strpos($_SERVER['PHP_SELF'],'admin/history') !== false ? 'active' : '' ?>">
-                    <i class="fas fa-clock-rotate-left"></i> History
+                    <i class="fas fa-clock-rotate-left"></i> <?= __('nav_history') ?>
                 </a>
             <?php else: ?>
                 <a href="<?= $baseUrl ?>/user/dashboard.php" class="nav-link <?= strpos($_SERVER['PHP_SELF'],'user/dashboard') !== false ? 'active' : '' ?>">
-                    <i class="fas fa-home"></i> My Toilets
+                    <i class="fas fa-home"></i> <?= __('nav_my_toilets') ?>
                 </a>
                 <a href="<?= $baseUrl ?>/user/profile.php" class="nav-link <?= strpos($_SERVER['PHP_SELF'],'user/profile') !== false ? 'active' : '' ?>">
-                    <i class="fas fa-user-gear"></i> Profile Picture
+                    <i class="fas fa-user-gear"></i> <?= __('nav_profile_picture') ?>
                 </a>
             <?php endif; ?>
         </div>
 
         <!-- Right side -->
         <div class="nav-right">
-            <div class="nav-user-badge">
+            <!-- Language Switcher -->
+            <?php
+            $currentLang = getCurrentLang();
+            $languages = getAvailableLanguages();
+            $activeLangMeta = $languages[$currentLang] ?? $languages['en'];
+            $currentUri = $_SERVER['REQUEST_URI'];
+            ?>
+            <div class="nav-lang-badge" tabindex="0" aria-label="Change Language">
+                <span class="lang-flag"><?= $activeLangMeta['flag'] ?></span>
+                <span class="lang-text"><?= $activeLangMeta['native'] ?></span>
+                <i class="fas fa-chevron-down lang-chevron"></i>
+                <div class="lang-dropdown">
+                    <div class="lang-dropdown-inner">
+                        <?php foreach ($languages as $code => $langInfo): ?>
+                            <a href="<?= $baseUrl ?>/set_lang.php?lang=<?= $code ?>&return=<?= urlencode($currentUri) ?>"
+                               class="lang-dropdown-item <?= $code === $currentLang ? 'active' : '' ?>">
+                                <span class="lang-flag"><?= $langInfo['flag'] ?></span>
+                                <span class="lang-item-name"><?= $langInfo['native'] ?></span>
+                                <?php if ($code === $currentLang): ?>
+                                    <i class="fas fa-check lang-item-check"></i>
+                                <?php endif; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Badge & Menu -->
+            <div class="nav-user-badge" tabindex="0">
                 <?= renderUserAvatar($user) ?>
                 <div class="user-info-mini">
                     <span class="user-name-mini"><?= e($user['full_name']) ?></span>
-                    <span class="user-role-badge <?= $isAdmin ? 'badge-admin' : 'badge-user' ?>"><?= $isAdmin ? 'Admin' : 'Student' ?></span>
+                    <span class="user-role-badge <?= $isAdmin ? 'badge-admin' : 'badge-user' ?>"><?= $isAdmin ? __('role_admin') : __('role_student') ?></span>
                 </div>
                 <div class="user-dropdown">
                     <div class="user-dropdown-inner">
                         <?php if (!$isAdmin): ?>
-                            <a href="<?= $baseUrl ?>/user/profile.php"><i class="fas fa-user-gear"></i> Profile Picture</a>
+                            <a href="<?= $baseUrl ?>/user/profile.php"><i class="fas fa-user-gear"></i> <?= __('nav_profile_picture') ?></a>
                         <?php endif; ?>
-                        <a href="<?= $baseUrl ?>/change_password.php"><i class="fas fa-key"></i> Change Password</a>
-                        <a href="<?= $baseUrl ?>/logout.php" class="text-danger"><i class="fas fa-right-from-bracket"></i> Logout</a>
+                        <a href="<?= $baseUrl ?>/change_password.php"><i class="fas fa-key"></i> <?= __('nav_change_password') ?></a>
+                        <a href="<?= $baseUrl ?>/logout.php" class="text-danger"><i class="fas fa-right-from-bracket"></i> <?= __('nav_logout') ?></a>
                     </div>
                 </div>
             </div>

@@ -22,11 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $row = $stmt->fetch();
 
     if (!$isMustChange && !password_verify($currentPw, $row['password_hash'])) {
-        $error = 'Current password is incorrect.';
+        $error = __('cp_error_current');
     } elseif (strlen($newPw) < 8) {
-        $error = 'New password must be at least 8 characters long.';
+        $error = __('cp_error_length');
     } elseif ($newPw !== $confirmPw) {
-        $error = 'Passwords do not match.';
+        $error = __('cp_error_match');
     } else {
         $hash = password_hash($newPw, PASSWORD_DEFAULT);
         $stmt = $db->prepare("UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?");
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update session flag
         $_SESSION['must_change_password'] = 0;
 
-        setFlash('success', 'Password changed successfully!');
+        setFlash('success', __('cp_success'));
         if ($currentUser['role'] === ROLE_ADMIN) {
             header('Location: ' . BASE_URL . '/admin/index.php');
         } else {
@@ -45,23 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Change Password';
+$pageTitle = __('cp_title');
 require_once __DIR__ . '/includes/header.php';
 ?>
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-key" style="color:var(--primary)"></i> Change Password</h1>
+        <h1><i class="fas fa-key" style="color:var(--primary)"></i> <?= e(__('cp_title')) ?></h1>
         <p class="page-subtitle">
             <?= $isMustChange
-                ? 'Welcome! Please set your own password before continuing.'
-                : 'Update your account password.' ?>
+                ? e(__('cp_subtitle_must'))
+                : e(__('cp_subtitle_normal')) ?>
         </p>
     </div>
 </div>
 
 <?php if ($isMustChange): ?>
     <div class="alert alert-warning">
-        ⚠️ You are required to set a new password before accessing the system.
+        ⚠️ <?= e(__('cp_alert_must')) ?>
     </div>
 <?php endif; ?>
 
@@ -71,15 +71,15 @@ require_once __DIR__ . '/includes/header.php';
 
 <div style="max-width:480px;">
     <div class="card">
-        <div class="card-title"><i class="fas fa-lock"></i> Password Settings</div>
+        <div class="card-title"><i class="fas fa-lock"></i> <?= e(__('cp_card_title')) ?></div>
         <form method="POST" novalidate>
 
             <?php if (!$isMustChange): ?>
             <div class="form-group">
-                <label class="form-label" for="current_password">Current Password</label>
+                <label class="form-label" for="current_password"><?= e(__('cp_current_password')) ?></label>
                 <div class="password-wrap">
                     <input type="password" id="current_password" name="current_password"
-                           class="form-control" placeholder="Enter current password" required>
+                           class="form-control" placeholder="<?= e(__('cp_current_placeholder')) ?>" required>
                     <button type="button" class="password-toggle"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
@@ -87,35 +87,36 @@ require_once __DIR__ . '/includes/header.php';
             <?php endif; ?>
 
             <div class="form-group">
-                <label class="form-label" for="new_password">New Password</label>
+                <label class="form-label" for="new_password"><?= e(__('cp_new_password')) ?></label>
                 <div class="password-wrap">
                     <input type="password" id="new_password" name="new_password"
-                           class="form-control" placeholder="Minimum 8 characters" required>
+                           class="form-control" placeholder="<?= e(__('cp_new_placeholder')) ?>" required>
                     <button type="button" class="password-toggle"><i class="fas fa-eye"></i></button>
                 </div>
-                <p class="form-hint">At least 8 characters. Use a mix of letters and numbers.</p>
+                <p class="form-hint"><?= e(__('cp_hint')) ?></p>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="confirm_password">Confirm New Password</label>
+                <label class="form-label" for="confirm_password"><?= e(__('cp_confirm_password')) ?></label>
                 <div class="password-wrap">
                     <input type="password" id="confirm_password" name="confirm_password"
-                           class="form-control" placeholder="Re-enter new password" required>
+                           class="form-control" placeholder="<?= e(__('cp_confirm_placeholder')) ?>" required>
                     <button type="button" class="password-toggle"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
 
             <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.5rem;">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Save Password
+                    <i class="fas fa-save"></i> <?= e(__('cp_submit_btn')) ?>
                 </button>
                 <?php if (!$isMustChange): ?>
                     <a href="<?= $currentUser['role'] === ROLE_ADMIN ? BASE_URL.'/admin/index.php' : BASE_URL.'/user/dashboard.php' ?>"
-                       class="btn btn-outline">Cancel</a>
+                       class="btn btn-outline"><?= e(__('action_cancel')) ?></a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
 </div>
+
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

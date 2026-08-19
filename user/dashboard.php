@@ -16,7 +16,7 @@ if (count($toilets) === 1) {
     exit;
 }
 
-$pageTitle = 'My Toilets';
+$pageTitle = __('nav_my_toilets');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -24,17 +24,17 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="page-header">
     <div class="page-header-left" style="display:flex;align-items:center;gap:1.1rem;">
-        <a href="<?= BASE_URL ?>/user/profile.php" title="Customize Profile Picture" style="text-decoration:none;display:inline-block;flex-shrink:0;">
+        <a href="<?= BASE_URL ?>/user/profile.php" title="<?= e(__('nav_profile_picture')) ?>" style="text-decoration:none;display:inline-block;flex-shrink:0;">
             <?= renderUserAvatar($currentUser, 'user-avatar-lg', 'width:52px;height:52px;font-size:1.3rem;box-shadow:0 0 12px rgba(0,212,170,0.25);border:2px solid var(--border);') ?>
         </a>
         <div>
-            <h1><i class="fas fa-home" style="color:var(--primary)"></i> My Assigned Toilets</h1>
-            <p class="page-subtitle">Welcome back, <?= e($currentUser['full_name']) ?>! Select a toilet to check in.</p>
+            <h1><i class="fas fa-home" style="color:var(--primary)"></i> <?= e(__('user_dash_title')) ?></h1>
+            <p class="page-subtitle"><?= __('user_dash_welcome', e($currentUser['full_name'])) ?></p>
         </div>
     </div>
     <div class="page-header-actions">
         <a href="<?= BASE_URL ?>/user/profile.php" class="btn btn-secondary btn-sm">
-            <i class="fas fa-user-gear"></i> Profile Picture
+            <i class="fas fa-user-gear"></i> <?= e(__('nav_profile_picture')) ?>
         </a>
     </div>
 </div>
@@ -42,13 +42,13 @@ require_once __DIR__ . '/../includes/header.php';
 <?php if (empty($toilets)): ?>
     <div class="empty-state" style="margin-top:4rem">
         <div class="empty-state-icon"><i class="fas fa-toilet"></i></div>
-        <h3>No Toilets Assigned</h3>
-        <p>You have not been assigned to any toilet yet.<br>Please contact your administrator.</p>
+        <h3><?= e(__('user_dash_empty_title')) ?></h3>
+        <p><?= __('user_dash_empty_desc') ?></p>
     </div>
 <?php else: ?>
     <div style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.9rem">
         <i class="fas fa-info-circle" style="color:var(--primary)"></i>
-        You have <?= count($toilets) ?> toilet<?= count($toilets)>1?'s':'' ?> assigned. Click a toilet to check in.
+        <?= __('user_dash_assigned_count', count($toilets)) ?>
     </div>
     <div class="toilet-grid">
         <?php foreach ($toilets as $toilet): ?>
@@ -71,12 +71,12 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
                 <div class="toilet-card-status">
                     <?php if ($active): ?>
-                        <span class="badge badge-open">● Active Check-In</span>
+                        <span class="badge badge-open">● <?= e(__('badge_active_checkin')) ?></span>
                         <span style="font-size:0.78rem;color:var(--text-muted);margin-left:0.5rem">
-                            since <?= fdt($active['checkin_at'], 'h:i A') ?>
+                            <?= __('user_dash_since', fdt($active['checkin_at'], 'h:i A')) ?>
                         </span>
                     <?php else: ?>
-                        <span class="badge badge-closed">Ready to Check In</span>
+                        <span class="badge badge-closed"><?= e(__('badge_ready')) ?></span>
                     <?php endif; ?>
                 </div>
             </a>
@@ -85,3 +85,4 @@ require_once __DIR__ . '/../includes/header.php';
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+

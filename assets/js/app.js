@@ -291,6 +291,15 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ===========================================================
        CAMERA MODAL
        =========================================================== */
+    const i18n = window.__i18n || {};
+    const tCamTitle    = i18n.cameraTitle    || 'Live Camera Capture';
+    const tCamWait     = i18n.cameraWait     || 'Camera will appear here';
+    const tCamAllow    = i18n.cameraAllow    || 'Allow camera permission when prompted';
+    const tCamDenied   = i18n.cameraDenied   || 'Camera access denied. Please allow camera permission in your browser.';
+    const tCamFlip     = i18n.cameraFlip     || 'Flip Camera';
+    const tCamTake     = i18n.cameraTake     || 'Take Photo';
+    const tCamCaptured = i18n.cameraCaptured || 'Captured Photos';
+    const tCamUseBtn   = i18n.cameraUseBtn   || 'Use %d Photo(s)';
 
     // Build a single reusable camera modal DOM node
     const cameraModal = document.createElement('div');
@@ -300,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="camera-modal-box">
             <div class="camera-modal-header">
                 <div class="camera-modal-title">
-                    <i class="fas fa-camera"></i> Live Camera Capture
+                    <i class="fas fa-camera"></i> ${tCamTitle}
                 </div>
                 <button class="camera-modal-close" id="cameraModalCloseBtn" type="button">
                     <i class="fas fa-times"></i>
@@ -313,30 +322,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="camera-flash" id="cameraFlash"></div>
                 <div class="camera-start-msg" id="cameraStartMsg">
                     <i class="fas fa-camera-retro"></i>
-                    <span>Camera will appear here</span>
-                    <small style="color:var(--text-muted);font-size:0.78rem">Allow camera permission when prompted</small>
+                    <span>${tCamWait}</span>
+                    <small style="color:var(--text-muted);font-size:0.78rem">${tCamAllow}</small>
                 </div>
             </div>
 
             <div class="camera-error" id="cameraError">
                 <i class="fas fa-circle-exclamation"></i>
-                <span id="cameraErrorText">Camera access denied. Please allow camera permission in your browser.</span>
+                <span id="cameraErrorText">${tCamDenied}</span>
             </div>
 
             <div class="camera-controls">
-                <button class="flip-camera-btn" id="flipCameraBtn" type="button" title="Flip Camera">
+                <button class="flip-camera-btn" id="flipCameraBtn" type="button" title="${tCamFlip}">
                     <i class="fas fa-camera-rotate"></i>
                 </button>
-                <button class="shutter-btn" id="shutterBtn" type="button" disabled title="Take Photo"></button>
+                <button class="shutter-btn" id="shutterBtn" type="button" disabled title="${tCamTake}"></button>
                 <div style="width:44px"></div><!-- spacer -->
             </div>
 
             <div class="captured-strip" id="capturedStrip" style="display:none">
-                <div class="captured-strip-label">Captured Photos</div>
+                <div class="captured-strip-label">${tCamCaptured}</div>
             </div>
 
             <button class="camera-add-btn" id="cameraAddBtn" type="button" disabled>
-                <i class="fas fa-check"></i> Use <span id="cameraAddCount">0</span> Photo(s)
+                <i class="fas fa-check"></i> <span id="cameraAddLabel">${tCamUseBtn.replace('%d', '0')}</span>
             </button>
         </div>
     `;
@@ -356,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cameraFlash  = document.getElementById('cameraFlash');
     const capturedStrip= document.getElementById('capturedStrip');
     const cameraAddBtn = document.getElementById('cameraAddBtn');
-    const cameraAddCnt = document.getElementById('cameraAddCount');
+    const cameraAddLbl = document.getElementById('cameraAddLabel');
     const cameraError  = document.getElementById('cameraError');
     const cameraErrTxt = document.getElementById('cameraErrorText');
     const cameraStartMsg=document.getElementById('cameraStartMsg');
@@ -406,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
             videoEl.style.display = 'none';
             cameraStartMsg.style.display = 'none';
             cameraErrTxt.textContent = err.name === 'NotAllowedError'
-                ? 'Camera access denied. Please allow camera permission in your browser settings.'
+                ? tCamDenied
                 : 'Camera not available: ' + err.message;
             cameraError.classList.add('show');
         }
@@ -504,7 +513,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateCameraAddBtn() {
         const count = cameraCaptured.length;
         cameraAddBtn.disabled = count === 0;
-        cameraAddCnt.textContent = count;
+        if (cameraAddLbl) {
+            cameraAddLbl.textContent = tCamUseBtn.replace('%d', count);
+        }
     }
 
 });
+

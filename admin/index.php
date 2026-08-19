@@ -35,7 +35,7 @@ $activeSess = $db->query("
     ORDER BY ts.checkin_at DESC
 ")->fetchAll();
 
-$pageTitle = 'Admin Dashboard';
+$pageTitle = __('admin_dash_title');
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -44,15 +44,15 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Page Header -->
 <div class="page-header">
     <div class="page-header-left">
-        <h1><i class="fas fa-gauge-high" style="color:var(--primary)"></i> Admin Dashboard</h1>
-        <p class="page-subtitle"><?= date('l, d F Y') ?> &mdash; <?= COLLEGE_NAME ?></p>
+        <h1><i class="fas fa-gauge-high" style="color:var(--primary)"></i> <?= e(__('admin_dash_title')) ?></h1>
+        <p class="page-subtitle"><?= date('l, d F Y') ?> &mdash; <?= e(__('college_name')) ?></p>
     </div>
     <div class="page-header-actions">
         <a href="<?= BASE_URL ?>/admin/users.php?action=add" class="btn btn-primary">
-            <i class="fas fa-user-plus"></i> Add User
+            <i class="fas fa-user-plus"></i> <?= e(__('add_new_user')) ?>
         </a>
         <a href="<?= BASE_URL ?>/admin/toilets.php?action=add" class="btn btn-accent">
-            <i class="fas fa-plus"></i> Add Toilet
+            <i class="fas fa-plus"></i> <?= e(__('add_new_toilet')) ?>
         </a>
     </div>
 </div>
@@ -63,35 +63,35 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="stat-icon"><i class="fas fa-users"></i></div>
         <div class="stat-info">
             <div class="stat-value"><?= $totalUsers ?></div>
-            <div class="stat-label">Total Users</div>
+            <div class="stat-label"><?= e(__('stat_total_users')) ?></div>
         </div>
     </div>
     <div class="stat-card accent">
         <div class="stat-icon"><i class="fas fa-toilet"></i></div>
         <div class="stat-info">
             <div class="stat-value"><?= $totalToilets ?></div>
-            <div class="stat-label">Total Toilets</div>
+            <div class="stat-label"><?= e(__('stat_total_toilets')) ?></div>
         </div>
     </div>
     <div class="stat-card warning">
         <div class="stat-icon"><i class="fas fa-door-open"></i></div>
         <div class="stat-info">
             <div class="stat-value"><?= $activeSessions ?></div>
-            <div class="stat-label">Active Check-Ins</div>
+            <div class="stat-label"><?= e(__('stat_active_checkins')) ?></div>
         </div>
     </div>
     <div class="stat-card success">
         <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
         <div class="stat-info">
             <div class="stat-value"><?= $todayCheckins ?></div>
-            <div class="stat-label">Today's Check-Ins</div>
+            <div class="stat-label"><?= e(__('stat_today_checkins')) ?></div>
         </div>
     </div>
     <div class="stat-card info">
         <div class="stat-icon"><i class="fas fa-door-closed"></i></div>
         <div class="stat-info">
             <div class="stat-value"><?= $todayCheckouts ?></div>
-            <div class="stat-label">Today's Check-Outs</div>
+            <div class="stat-label"><?= e(__('stat_today_checkouts')) ?></div>
         </div>
     </div>
 </div>
@@ -103,22 +103,25 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card" style="grid-column:<?= count($activeSess) > 0 ? '1' : 'span 2' ?>">
         <div class="card-title">
             <i class="fas fa-circle-dot" style="color:var(--warning)"></i>
-            Live Active Sessions
+            <?= e(__('live_active_sessions')) ?>
             <?php if ($activeSessions > 0): ?>
-                <span class="badge badge-open" style="margin-left:auto"><?= $activeSessions ?> active</span>
+                <span class="badge badge-open" style="margin-left:auto"><?= $activeSessions ?> <?= strtolower(__('status_active')) ?></span>
             <?php endif; ?>
         </div>
         <?php if (empty($activeSess)): ?>
             <div class="empty-state" style="padding:2rem">
                 <div class="empty-state-icon"><i class="fas fa-moon"></i></div>
-                <h3>All Clear</h3>
-                <p>No active check-ins at the moment.</p>
+                <h3><?= e(__('all_clear_title')) ?></h3>
+                <p><?= e(__('all_clear_desc')) ?></p>
             </div>
         <?php else: ?>
             <div class="table-wrapper" style="border:none">
                 <table>
                     <thead><tr>
-                        <th>Toilet</th><th>User</th><th>Since</th><th>Elapsed</th>
+                        <th><?= e(__('th_toilet')) ?></th>
+                        <th><?= e(__('th_user')) ?></th>
+                        <th><?= e(__('th_since')) ?></th>
+                        <th><?= e(__('th_elapsed')) ?></th>
                     </tr></thead>
                     <tbody>
                     <?php foreach ($activeSess as $s): ?>
@@ -142,19 +145,19 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- Quick Links -->
     <?php if (count($activeSess) > 0): ?>
     <div class="card">
-        <div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+        <div class="card-title"><i class="fas fa-bolt"></i> <?= e(__('quick_actions')) ?></div>
         <div style="display:flex; flex-direction:column; gap:0.75rem;">
             <a href="<?= BASE_URL ?>/admin/users.php" class="btn btn-outline btn-full">
-                <i class="fas fa-users"></i> Manage Users
+                <i class="fas fa-users"></i> <?= e(__('manage_users')) ?>
             </a>
             <a href="<?= BASE_URL ?>/admin/toilets.php" class="btn btn-outline btn-full">
-                <i class="fas fa-toilet"></i> Manage Toilets
+                <i class="fas fa-toilet"></i> <?= e(__('manage_toilets')) ?>
             </a>
             <a href="<?= BASE_URL ?>/admin/history.php" class="btn btn-outline btn-full">
-                <i class="fas fa-clock-rotate-left"></i> View Full History
+                <i class="fas fa-clock-rotate-left"></i> <?= e(__('view_full_history')) ?>
             </a>
             <a href="<?= BASE_URL ?>/admin/users.php?action=add" class="btn btn-primary btn-full">
-                <i class="fas fa-user-plus"></i> Add New User
+                <i class="fas fa-user-plus"></i> <?= e(__('add_new_user')) ?>
             </a>
         </div>
     </div>
@@ -164,28 +167,28 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Recent Sessions Table -->
 <div class="card">
     <div class="card-title">
-        <i class="fas fa-clock-rotate-left"></i> Recent Sessions
+        <i class="fas fa-clock-rotate-left"></i> <?= e(__('recent_sessions')) ?>
         <a href="<?= BASE_URL ?>/admin/history.php" class="btn btn-outline btn-sm" style="margin-left:auto">
-            View All <i class="fas fa-arrow-right"></i>
+            <?= e(__('action_view_all')) ?> <i class="fas fa-arrow-right"></i>
         </a>
     </div>
     <?php if (empty($recentSessions)): ?>
         <div class="empty-state">
             <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
-            <h3>No Sessions Yet</h3>
-            <p>Check-in records will appear here once users start their sessions.</p>
+            <h3><?= e(__('no_sessions_title')) ?></h3>
+            <p><?= e(__('no_sessions_desc')) ?></p>
         </div>
     <?php else: ?>
         <div class="table-wrapper" style="border:none">
             <table>
                 <thead><tr>
-                    <th>Toilet</th>
-                    <th>User</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th><?= e(__('th_toilet')) ?></th>
+                    <th><?= e(__('th_user')) ?></th>
+                    <th><?= e(__('th_checkin')) ?></th>
+                    <th><?= e(__('th_checkout')) ?></th>
+                    <th><?= e(__('th_duration')) ?></th>
+                    <th><?= e(__('th_status')) ?></th>
+                    <th><?= e(__('th_actions')) ?></th>
                 </tr></thead>
                 <tbody>
                 <?php foreach ($recentSessions as $s): ?>
@@ -195,16 +198,16 @@ require_once __DIR__ . '/../includes/header.php';
                         <td class="td-muted"><?= fdt($s['checkin_at'], 'd M, h:i A') ?></td>
                         <td class="td-muted"><?= $s['checkout_at'] ? fdt($s['checkout_at'], 'd M, h:i A') : '—' ?></td>
                         <td class="td-muted">
-                            <?= $s['checkout_at'] ? timeDiff($s['checkin_at'], $s['checkout_at']) : '<span class="text-warning">Ongoing</span>' ?>
+                            <?= $s['checkout_at'] ? timeDiff($s['checkin_at'], $s['checkout_at']) : '<span class="text-warning">' . e(__('badge_ongoing')) . '</span>' ?>
                         </td>
                         <td>
                             <span class="badge badge-<?= $s['status'] ?>">
-                                <?= $s['status'] === 'open' ? '● Open' : '✓ Closed' ?>
+                                <?= $s['status'] === 'open' ? '● ' . e(__('status_open')) : '✓ ' . e(__('status_closed')) ?>
                             </span>
                         </td>
                         <td>
                             <a href="<?= BASE_URL ?>/admin/history.php?session_id=<?= $s['id'] ?>"
-                               class="btn btn-outline btn-sm btn-icon" title="View Details">
+                               class="btn btn-outline btn-sm btn-icon" title="<?= e(__('action_view_details')) ?>">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </td>
@@ -217,3 +220,4 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
