@@ -167,9 +167,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Countdown for open sessions
     // ============================================================
     document.querySelectorAll('[data-checkin-time]').forEach(el => {
-        const checkinTime = new Date(el.getAttribute('data-checkin-time').replace(' ', 'T'));
+        // Parse MySQL datetime string as LOCAL time (not UTC).
+        // Split manually: "2026-08-19 11:35:00" → Date(y,m-1,d,H,M,S)
+        const raw = el.getAttribute('data-checkin-time');
+        const parts = raw.match(/(\d{4})-(\d{2})-(\d{2})[T ]?(\d{2}):(\d{2}):(\d{2})/);
+        const checkinTime = parts
+            ? new Date(+parts[1], +parts[2]-1, +parts[3], +parts[4], +parts[5], +parts[6])
+            : new Date(raw); // fallback
         function updateElapsed() {
             const diff = Math.floor((Date.now() - checkinTime.getTime()) / 1000);
+            if (diff < 0) { el.textContent = '0s elapsed'; return; }
             const h = Math.floor(diff / 3600);
             const m = Math.floor((diff % 3600) / 60);
             const s = diff % 60;

@@ -7,6 +7,41 @@ require_once __DIR__ . '/../includes/functions.php';
 requireAdmin();
 $db = getDB();
 
+// ── Handle DELETE actions ──────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+
+    // Delete a single session
+    if ($_POST['action'] === 'delete_session' && !empty($_POST['session_id'])) {
+        $sid = (int)$_POST['session_id'];
+        // Delete associated photos from DB (files left on disk — admin can clean manually)
+        $db->prepare('DELETE FROM session_photos WHERE session_id = ?')->execute([$sid]);
+        $db->prepare('DELETE FROM toilet_sessions WHERE id = ?')->execute([$sid]);
+        setFlash('success', 'Session record deleted.');
+        header('Location: ' . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    // Delete ALL currently-filtered sessions
+    if ($_POST['action'] === 'delete_all_filtered' && !empty($_POST['session_ids'])) {
+        $ids = array_map('intval', explode(',', $_POST['session_ids']));
+        if (!empty($ids)) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $db->prepare("DELETE FROM session_photos WHERE session_id IN ($placeholders)")->execute($ids);
+            $db->prepare("DELETE FROM toilet_sessions WHERE id IN ($placeholders)")->execute($ids);
+            setFlash('success', count($ids) . ' session record(s) deleted.');
+        }
+        // Redirect back without session_id focus filter
+        $qs = http_build_query(array_filter([
+            'toilet_id' => $_GET['toilet_id'] ?? '',
+            'user_id'   => $_GET['user_id']   ?? '',
+            'status'    => $_GET['status']    ?? '',
+            'date'      => $_GET['date']      ?? '',
+        ]));
+        header('Location: ' . BASE_URL . '/admin/history.php' . ($qs ? '?' . $qs : ''));
+        exit;
+    }
+}
+
 // Filters
 $filterToilet = (int)($_GET['toilet_id'] ?? 0);
 $filterUser   = (int)($_GET['user_id'] ?? 0);
@@ -86,6 +121,20 @@ require_once __DIR__ . '/../includes/header.php';
     </span>
 </form>
 
+<?php if (!empty($sessions)): ?>
+<?php $allSessionIds = implode(',', array_column($sessions, 'id')); ?>
+<div style="margin-bottom:1rem;display:flex;justify-content:flex-end">
+    <form method="POST" action="" id="deleteAllForm">
+        <input type="hidden" name="action" value="delete_all_filtered">
+        <input type="hidden" name="session_ids" value="<?= e($allSessionIds) ?>">
+        <button type="submit" class="btn btn-danger btn-sm"
+            data-confirm="Delete ALL <?= count($sessions) ?> visible record(s)? This cannot be undone.">
+            <i class="fas fa-trash-can"></i> Delete All Visible (<?= count($sessions) ?>)
+        </button>
+    </form>
+</div>
+<?php endif; ?>
+
 <!-- History Timeline -->
 <?php if (empty($sessions)): ?>
     <div class="empty-state">
@@ -133,6 +182,16 @@ require_once __DIR__ . '/../includes/header.php';
                         </span>
                     <?php endif; ?>
                     <span class="expand-icon" style="color:var(--text-muted);font-size:0.75rem"><?= $isFocus ? '▲' : '▼' ?></span>
+                    <!-- Delete button -->
+                    <form method="POST" action="" style="margin:0" onclick="event.stopPropagation()">
+                        <input type="hidden" name="action" value="delete_session">
+                        <input type="hidden" name="session_id" value="<?= $sess['id'] ?>">
+                        <button type="submit" class="btn btn-danger btn-sm btn-icon"
+                            title="Delete this record"
+                            data-confirm="Delete this session record for <?= e($sess['full_name']) ?>? This cannot be undone.">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
 
