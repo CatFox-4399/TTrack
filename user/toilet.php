@@ -319,7 +319,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <i class="fas fa-user"></i> <?= e($sess['full_name']) ?>
                                 <span style="color:var(--border)">|</span>
                                 <i class="fas fa-camera"></i>
-                                <?= count($ciPhotos) + count($coPhotos) ?> photos
+                                <?= e(__('photos_count', count($ciPhotos) + count($coPhotos))) ?>
                                 <span style="color:var(--border)">|</span>
                                 <?= e(__('duration_label')) ?>: <?= timeDiff($sess['checkin_at'], $sess['checkout_at']) ?>
                             </div>

@@ -117,7 +117,7 @@ require_once __DIR__ . '/../includes/header.php';
         </a>
     <?php endif; ?>
     <span class="td-muted" style="font-size:0.82rem;margin-left:auto">
-        <?= __('records_found', count($sessions)) ?>
+        <?= e(__('records_found', count($sessions))) ?>
     </span>
 </form>
 
@@ -129,7 +129,7 @@ require_once __DIR__ . '/../includes/header.php';
         <input type="hidden" name="session_ids" value="<?= e($allSessionIds) ?>">
         <button type="submit" class="btn btn-danger btn-sm"
             data-confirm="<?= e(__('confirm_delete_all_filtered', count($sessions))) ?>">
-            <i class="fas fa-trash-can"></i> <?= e(__('delete_all_visible')) ?> (<?= count($sessions) ?>)
+            <i class="fas fa-trash-can"></i> <?= e(__('delete_all_visible', count($sessions))) ?>
         </button>
     </form>
 </div>
@@ -168,7 +168,7 @@ require_once __DIR__ . '/../includes/header.php';
                             <span style="color:var(--border)">|</span>
                             <i class="fas fa-calendar"></i> <?= fdt($sess['checkin_at'], 'd M Y') ?>
                             <span style="color:var(--border)">|</span>
-                            <i class="fas fa-camera"></i> <?= count($ciPhotos) + count($coPhotos) ?> <?= e(strtolower(__('photos_count', ''))) ?>
+                            <i class="fas fa-camera"></i> <?= e(__('photos_count', count($ciPhotos) + count($coPhotos))) ?>
                         </div>
                     </div>
                 </div>
@@ -214,15 +214,15 @@ require_once __DIR__ . '/../includes/header.php';
                         <?php endif; ?>
 
                         <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.75rem">
-                            <i class="fas fa-images"></i> <?= __('before_photos_count', count($ciPhotos)) ?>
+                            <i class="fas fa-images"></i> <?= e(__('before_photos_count', count($ciPhotos))) ?>
                         </div>
                         <?php if (!empty($ciPhotos)): ?>
                             <div class="photo-gallery">
                                 <?php foreach ($ciPhotos as $p): ?>
                                     <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                       title="<?= e($p['original_name'] ?? __('before_photos_count', '')) ?>">
+                                       title="<?= e($p['original_name'] ?? __('before_photos')) ?>">
                                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                             alt="<?= e(__('before_photos_count', '')) ?>" loading="lazy">
+                                             alt="<?= e(__('before_photos')) ?>" loading="lazy">
                                     </a>
                                 <?php endforeach; ?>
                             </div>
@@ -250,15 +250,15 @@ require_once __DIR__ . '/../includes/header.php';
                         <?php endif; ?>
 
                         <div class="section-label" style="color:var(--text-muted);margin-top:0.75rem;margin-bottom:0.4rem;font-size:0.75rem">
-                            <i class="fas fa-images"></i> <?= __('after_photos_count', count($coPhotos)) ?>
+                            <i class="fas fa-images"></i> <?= e(__('after_photos_count', count($coPhotos))) ?>
                         </div>
                         <?php if (!empty($coPhotos)): ?>
                             <div class="photo-gallery">
                                 <?php foreach ($coPhotos as $p): ?>
                                     <a href="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                       title="<?= e($p['original_name'] ?? __('after_photos_count', '')) ?>">
+                                       title="<?= e($p['original_name'] ?? __('after_photos')) ?>">
                                         <img src="<?= BASE_URL ?>/uploads/sessions/<?= e($p['file_path']) ?>"
-                                             alt="<?= e(__('after_photos_count', '')) ?>" loading="lazy">
+                                             alt="<?= e(__('after_photos')) ?>" loading="lazy">
                                     </a>
                                 <?php endforeach; ?>
                             </div>
